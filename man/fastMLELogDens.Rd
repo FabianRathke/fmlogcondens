@@ -11,23 +11,28 @@ fastMLELogDens(X, w = rep(1/nrow(X), nrow(X)), init = "", verbose = 1)
 
 \item{w}{Sample weights}
 
-\item{init}{String determining the initialization approach ('kernel' based on kernel density, 'smooth' based on smooth log-concave density, '' compares both and takes the optimal one)}
+\item{init}{String determining the initialization approach ('kernel' based on
+kernel density, 'smooth' based on smooth log-concave density, '' compares
+both and takes the optimal one)}
 
-\item{verbose}{Int determining the verboseness of the code (0 = no outputs to 3 (inlcudes debug information))}
+\item{verbose}{Int determining the verboseness of the code (0 (no output)
+to 3)}
 }
 \value{
-Parametrization of f(x) in terms of hyperplanes and function evaluations y = log(f(x))
-\item{aOpt, bOpt}{Analytically normalized parameters of f(x).}
-\item{logLike}{Log-likelihood of f(x)}
-\item{y}{Vector with values y_i = log(f(X_)) of the normalized density (\eqn{logLike = \sum(y_i)}).}
-\item{aOptSparse, bOptSparse}{Sparse parametrization normalized on the integration grid.}
+Parametrization of f(x) in terms of hyperplanes and function
+  evaluations y = log(f(x)) \item{aOpt, bOpt}{Analytically normalized
+  parameters of f(x).} \item{logLike}{Log-likelihood of f(x)} \item{y}{Vector
+  with values y_i = log(f(X_)) of the normalized density (\eqn{logLike =
+  \sum(y_i)}).} \item{aOptSparse, bOptSparse}{Sparse parametrization
+  normalized on the integration grid.}
 }
 \description{
-\code{fastMLELogDens} returns a MLE estimate of a log-concave density for \code{X}.
-After obtaining an initial parameter estimate the MLE objective with log-concavity and normalization
-constraint is optimized using a quasi-Newton approach for large scale optimization (BFGS-L). The
-logarithm of the optimal density f(x) is a piecewise-linear function. Its parametrization in terms of
-a set of hyperplanes is returned.
+\code{fastMLELogDens} returns a MLE estimate of a log-concave
+  density for \code{X}. After obtaining an initial parameter estimate the MLE
+  objective with log-concavity and normalization constraint is optimized
+  using a quasi-Newton approach for large scale optimization (BFGS-L). The
+  logarithm of the optimal density f(x) is a piecewise-linear function. Its
+  parametrization in terms of a set of hyperplanes is returned.
 }
 \examples{
 # draw samples from normal distribution

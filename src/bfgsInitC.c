@@ -88,7 +88,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
     float *XF = malloc(n*dim*sizeof(float));    for (i=0; i < n*dim; i++) { XF[i] = X[i]; }
     float *XWF = malloc(n*sizeof(float)); for (i=0; i < n; i++) { XWF[i] = XW[i]; }
 
-	unzipParams(params,a,b,dim,nH,1);
+	unzipParamsFloat(params,a,b,dim,nH,1);
 
 	double *influence = malloc(nH*sizeof(double));
 	double alpha = 1e-4, beta = 0.1;
@@ -132,7 +132,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 		TermAOld = *TermA; TermBOld = *TermB; funcVal = TermAOld + TermBOld; copyVector(gradOld,grad,nH*(dim+1),0);
 		// new parameters
 		for (i=0; i < lenP; i++) { paramsNew[i] = params[i] + newtonStep[i]; }
-		unzipParams(paramsNew,a,b,dim,nH,1);
+		unzipParamsFloat(paramsNew,a,b,dim,nH,1);
 		// calculate gradient and objective function value
 		calcGradFloatAVXCaller(XF, XWF, gridFloat, a, b, gamma, weight, delta, n, dim, nH, lenY, gradA, gradB, TermA, TermB, influence, YIdx);
 		sumGrad(grad,gradA,gradB,(dim+1)*nH);
@@ -146,7 +146,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 			for (i=0; i < lenP; i++) {
 				paramsNew[i] = params[i] + (newtonStep[i]*step);
 			}
-			unzipParams(paramsNew,a,b,dim,nH,1);
+			unzipParamsFloat(paramsNew,a,b,dim,nH,1);
 
 			calcGradFloatAVXCaller(XF, XWF, gridFloat, a, b, gamma, weight, delta, n, dim, nH, lenY, gradA, gradB, TermA, TermB, influence, YIdx);
 			sumGrad(grad,gradA,gradB,(dim+1)*nH);

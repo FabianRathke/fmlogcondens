@@ -42,11 +42,11 @@ correctIntegral <- function(X, mu, a, b, cvh) {
   aOptSparse <- matrix(r$a, length(r$b), d)
   bOptSparse <- r$b
 
-  y = apply(-aOpt %*% t(X) - matrix(rep(bOpt, n), length(bOpt), n), 2, min)
+  y = apply(-a %*% t(X) - matrix(rep(b, n), length(b), n), 2, min)
   idxCVH <- unique(as.vector(cvh))
   P <- matrix(c(X, t(y)), nrow = n)
-  Q <- matrix(c(X[idxCVH, ], rep(min(yT[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-  T <- convhulln(rbind(P, Q))
+  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
+  T <- geometry::convhulln(rbind(P, Q))
   T <- T[!(apply(T,1,max) > n), ]
 
   X <- X + t(matrix(rep(mu,n), 2, n))
@@ -72,5 +72,5 @@ correctIntegral <- function(X, mu, a, b, cvh) {
     warning('Potential numerical problems when calculating the final set of hyperplanes --> Recommended to run the optimization again')
   }
 
-  return(list("aOpt" = aOptNew, "bOpt" = bOptNew, "aOptSparse" = aOptSparse, "bOptSparse" = bOptSparse, "yT" = r$y))
+  return(list("aOpt" = aOptNew, "bOpt" = bOptNew, "aOptSparse" = aOptSparse, "bOptSparse" = bOptSparse, "y" = r$y))
 }

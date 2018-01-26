@@ -15,18 +15,20 @@ correctIntegral(X, mu, a, b, cvh)
 
 \item{b}{Vector where entries are offsets of hyperplanes}
 
-\item{cvh}{Matrix where each row is a set of indices of points in X describing one face of conv(X)}
+\item{cvh}{Matrix where each row is a set of indices of points in X
+describing one face of conv(X)}
 }
 \value{
-Normalized hyperplane parameters (for the uncentered \code{X <- X + mu})
-\item{aOpt, bOpt}{Hyperplane parameters of the normalized density.}
-\item{y}{Vector with values y_i = log(f(X_)) of the normalized density.}
-\item{aOptSparse, bOptSparse}{Input hyperplane parameters.}
+Normalized hyperplane parameters (for the uncentered \code{X <- X +
+  mu}) \item{aOpt, bOpt}{Hyperplane parameters of the normalized density.}
+  \item{y}{Vector with values y_i = log(f(X_)) of the normalized density.}
+  \item{aOptSparse, bOptSparse}{Input hyperplane parameters.}
 }
 \description{
-\code{correctIntegral} normalizes a log-concave density parametrized by a set of hyperplane
-parameters. Works by calculating y = log(f(x)) for each data point in X, normalizing y, and then recalculating
-a and b.
+\code{correctIntegral} normalizes a log-concave density
+  parametrized by a set of hyperplane parameters. Works by calculating y =
+  log(f(x)) for each data point in X, normalizing y, and then recalculating a
+  and b.
 }
 \examples{
 # draw samples from normal distribution

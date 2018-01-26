@@ -11,22 +11,28 @@ paramFitGammaOne(X, w, ACVH, bCVH, cvh)
 
 \item{w}{Vector with weights for X (\code{sum(w)==1})}
 
-\item{ACVH}{Matrix where each row constitutes the normal vector of a face of conv(X)}
+\item{ACVH}{Matrix where each row constitutes the normal vector of a face of
+conv(X)}
 
-\item{bCVH}{Vector where each entry constitutes the offset for a face of conv(X)}
+\item{bCVH}{Vector where each entry constitutes the offset for a face of
+conv(X)}
 
-\item{cvh}{Matrix where each row is a set of indices of points in X describing one face of conv(X)}
+\item{cvh}{Matrix where each row is a set of indices of points in X
+describing one face of conv(X)}
 }
 \value{
-A list containing the description of the upper convex hull of (X,log(y)) in term of hyperplane parameters:
-\item{a}{A matrix where each row constitutes the normal vector of a face}
-\item{b}{A vector where each entry constitutes the offset of a face}
+A list containing the description of the upper convex hull of
+  (X,log(y)) in term of hyperplane parameters: \item{a}{A matrix where each
+  row constitutes the normal vector of a face} \item{b}{A vector where each
+  entry constitutes the offset of a face}
 }
 \description{
-\code{paramFitGammaOne} fits in a first step a log-concave density to data points X with weights w
-using a smoothness parameter of gamma=1. In a second step, it calculates the upper convex hull of the set X
-and log(y), where y_i is the smooth log-concave density evaluated at X_i. It returns the hyperplane parameters of
-the faces of this upper convex hull.
+\code{paramFitGammaOne} fits in a first step a log-concave
+  density to data points X with weights w using a smoothness parameter of
+  gamma=1. In a second step, it calculates the upper convex hull of the set X
+  and log(y), where y_i is the smooth log-concave density evaluated at X_i.
+  It returns the hyperplane parameters of the faces of this upper convex
+  hull.
 }
 \examples{
 # draw samples from normal distribution

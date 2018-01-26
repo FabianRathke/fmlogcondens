@@ -11,19 +11,22 @@ paramFitKernelDensity(X, w, cvh, h = apply(X, 2, sd) * n^(-1/(d + 4)))
 
 \item{w}{Vector with weights for X (\code{sum(w) == 1})}
 
-\item{cvh}{Matrix where each row is a set of indices of points in X describing one face of conv(X)}
+\item{cvh}{Matrix where each row is a set of indices of points in X
+describing one face of conv(X)}
 
 \item{h}{Scalar parameter that governs the Gaussian kernel}
 }
 \value{
-A list containing the description of the upper convex hull of (X,log(y)) in term of hyperplane parameters:
-\item{a}{A matrix where each row constitutes the normal vector of a face}
-\item{b}{A vector where each entry constitutes the offset of a face}
+A list containing the description of the upper convex hull of
+  (X,log(y)) in term of hyperplane parameters: \item{a}{A matrix where each
+  row constitutes the normal vector of a face} \item{b}{A vector where each
+  entry constitutes the offset of a face}
 }
 \description{
-\code{paramFitKernelDensity} first fits a kernel density to a sample X
-with weight vector w. It then calculates the parameters of the piecewise linear function
-defined to be the upper convex hull of (X,log(y)).
+\code{paramFitKernelDensity} first fits a kernel density to a
+  sample X with weight vector w. It then calculates the parameters of the
+  piecewise linear function defined to be the upper convex hull of
+  (X,log(y)).
 }
 \examples{
 # draw samples from normal distribution

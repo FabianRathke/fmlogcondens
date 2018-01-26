@@ -13,6 +13,7 @@ void calcGradFullAVXC(float* gradA, float* gradB, double* influence, float* Term
 void calcGradFloatC(float* gradA, float* gradB, double* influence, float* TermA, float* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, float* a, float* b, float gamma, float weight, float* delta, int N, int NIter, int M, int dim, int nH);
 // Utility functions
 void unzipParams(double *params, double *a, double *b, int dim, int nH, int transpose);
+void unzipParamsFloat(double *params, float *a, float *b, int dim, int nH, int transpose);
 double calcLambdaSq(double* grad, double* newtonStep, int dim, int nH);
 void copyVector(double* dest, double* source, int n, int switchSign);
 double cpuSecond();

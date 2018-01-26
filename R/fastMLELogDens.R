@@ -30,11 +30,6 @@ fastMLELogDens <- function(X,
 
   gamma = 1000
 
-  dyn.load("~/Documents/Arbeit/Code/MyCode/LogConcave/R/kernelDensC.so")
-  dyn.load("~/Documents/Arbeit/Code/MyCode/LogConcave/R/calcExactIntegral.so")
-  dyn.load("~/Documents/Arbeit/Code/MyCode/LogConcave/R/bfgsInitC.so")
-  dyn.load("~/Documents/Arbeit/Code/MyCode/LogConcave/R/bfgsFullC.so")
-
   n <- dim(X)[1]
   d <- dim(X)[2]
 
@@ -84,7 +79,7 @@ fastMLELogDens <- function(X,
             as.double(1e-3),
             as.double(1e-7),
             as.double(1e-2),
-            as.integer(2))
+            as.integer(verbose))
   # res$lenP denotes the number of active parameters in res$params
   optParams <- res$params[1:res$lenP]
   nH <- res$lenP/(d+1) # number of hyperplanes
@@ -92,7 +87,7 @@ fastMLELogDens <- function(X,
   bOpt <- optParams[(d*nH+1):length(optParams)]
 
   result <- correctIntegral(X,mu,aOpt,bOpt,r$cvh);
-  logLike = result$yT*t(w)*length(w);
+  logLike = result$y*t(w)*length(w);
 
   # update convex hull parameters for true X
   #r$bCVH <- r$bCVH + r$ACVH %*% t(mu)

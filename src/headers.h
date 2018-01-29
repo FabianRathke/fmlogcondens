@@ -1,4 +1,5 @@
 #include <immintrin.h>
+#include <R.h>
 
 void setGridDensity(double *box, int dim, int sparseGrid, int *N, int *M, double **grid, double* weight);
 void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox, int **numPointsPerBox, double **boxEvalPoints, double *ACVH, double *bCVH, double *box, int *lenY, int *numBoxes, int dim, int lenCVH, int N, int M, int NX);

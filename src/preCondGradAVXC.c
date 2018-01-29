@@ -306,9 +306,6 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	aGamma = memalign(ALIGN,dim*nH*sizeof(float));
 	aTransGamma = memalign(ALIGN,dim*nH*sizeof(float));
 	bGamma = memalign(ALIGN,nH*sizeof(float));
-/*	assert(!posix_memalign((void **) &aGamma, ALIGN, dim*nH*sizeof(float)));
-	assert(!posix_memalign((void **) &aTransGamma, ALIGN, dim*nH*sizeof(float)));
-	assert(!posix_memalign((void **) &bGamma, ALIGN, nH*sizeof(float)));*/
 
 	int i,j,k,l;
     float *gridLocal = malloc(dim*sizeof(float));
@@ -333,13 +330,11 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	#pragma omp parallel
 	{   
 		float* ftInner;
-		//assert(!posix_memalign((void **) &ftInner, ALIGN, nH*sizeof(float)));
 		ftInner = memalign(ALIGN,nH*sizeof(float));
-		float* ftInnerUnroll[UNROLL];
+		/*float* ftInnerUnroll[UNROLL];
 		for (int l=0; l < UNROLL; l++) {
-			//assert(!posix_memalign((void **) &(ftInnerUnroll[l]), ALIGN, nH*sizeof(float)));
 			ftInnerUnroll[l] = memalign(ALIGN,nH*sizeof(float));
-		}
+		}*/
 		int numElementsUnroll[UNROLL];
 		int sizeElementList = elementListIncrement;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
@@ -369,8 +364,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				if (tmp != NULL) {
 				   elementListLocal = tmp; 
 				} else {
-					printf("Realloc failed --> exiting the programm");
-					exit(0);
+					error("Realloc failed --> aborting execution");
 				}
 				//elementListLocal = realloc(elementListLocal,sizeElementList*sizeof(int));
 			}
@@ -399,8 +393,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				if (tmp != NULL) {
 					*elementList = tmp;
 				} else { 
-					printf("Realloc failed --> exiting the programm");
-					exit(0);
+					error("Realloc failed --> aborting execution");
 				}
 				**elementListSize = counter;
 			}
@@ -419,9 +412,9 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				savedValues += *counterLocal;
 			}
 		}
-		for (l=0; l < UNROLL; l++) {
-//			free(ftInnerUnroll[l]);
-		}
+/*		for (l=0; l < UNROLL; l++) {
+			free(ftInnerUnroll[l]);
+		}*/
 		free(elementListLocal); free(ftInner); free(idxMax); free(counterLocal);
 	}
     double timeTotal = cpuSecond()-iStart;
@@ -528,8 +521,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 						if (tmp != NULL) {
 						   elementListLocal = tmp; 
 						} else {
-							printf("Realloc failed --> exiting the programm");
-							exit(0);
+							error("Realloc failed --> aborting execution");
 						}
 					}
 					numElementsOld = *counterLocal;
@@ -557,8 +549,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				if (tmp != NULL) {
 					*elementList = tmp;
 				} else { 
-					printf("Realloc failed --> exiting the programm");
-					exit(0);
+					error("Realloc failed --> aborting execution");
 				}
             	//*elementList = realloc(*elementList,counter*sizeof(int));
 				**elementListSize = counter;

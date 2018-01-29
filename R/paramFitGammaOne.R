@@ -96,7 +96,7 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
     print('#### Bad initialization due to small sample size, switch to kernel kensity based initialization ####');
     params <- paramFitKernelDensity(X, w, cvh)
   } else {
-    params <- list("a" = aOpt, "b" = bOpt)
+    params <- c(aOpt,bOpt)
   }
 
   return(params)

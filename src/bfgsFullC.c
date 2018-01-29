@@ -496,7 +496,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		}
 		funcValStep = *TermA + *TermB;
 
-		while (isnan(funcValStep) || isinf(funcValStep) || funcValStep > funcVal - step*alpha*lambdaSq) {
+		while (ISNAN(funcValStep) || isinf(funcValStep) || funcValStep > funcVal - step*alpha*lambdaSq) {
 			if (step < 1e-9) {
 				break;
 			}

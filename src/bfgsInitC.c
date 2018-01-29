@@ -138,7 +138,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 		sumGrad(grad,gradA,gradB,(dim+1)*nH);
 		funcValStep = *TermA + *TermB;
 
-		while (isnan(funcValStep) || isinf(funcValStep) || funcValStep > funcVal - step*alpha*lambdaSq) {
+		while (ISNAN(funcValStep) || isinf(funcValStep) || funcValStep > funcVal - step*alpha*lambdaSq) {
 			if (step < 1e-9) {
 				break;
 			}

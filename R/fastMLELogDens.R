@@ -23,6 +23,7 @@
 #'   normalized on the integration grid.}
 #'
 #' @example Examples/correctIntegral
+
 fastMLELogDens <- function(X,
                       w=rep(1/nrow(X),nrow(X)),
                       init='',
@@ -45,14 +46,26 @@ fastMLELogDens <- function(X,
 
   paramsKernel <- double()
   if (init == 'kernel') {
+    if (verbose > 0) {
+      print("Use kernel density estimation for initialization.")
+    }
       params <- paramFitKernelDensity(X,w,r$cvh)
   } else if (init == 'smooth') {
+      if (verbose > 0) {
+        print("Use smooth log-concave density estimation for initialization.")
+      }
       params <- paramFitGammaOne(X,w,r$ACVH,r$bCVH,r$cvh)
   } else {
     if (n < 2500) {
+      if (verbose > 0) {
+        print("Use kernel density and smooth log-concave density estimation for initialization.")
+      }
       paramsKernel <- paramFitKernelDensity(X,w,r$cvh)
       params <- paramFitGammaOne(X,w,r$ACVH,r$bCVH,r$cvh)
     } else {
+      if (verbose > 0) {
+        print("Use smooth log-concave density estimation for initialization.")
+      }
       params <- paramFitGammaOne(X,w,r$ACVH,r$bCVH,r$cvh)
     }
   }
@@ -78,10 +91,11 @@ fastMLELogDens <- function(X,
             as.integer(length(r$bCVH)),
             as.double(1e-3),
             as.double(1e-7),
-            as.double(1e-2),
+            as.double(1e-1),
             as.integer(verbose))
   # res$lenP denotes the number of active parameters in res$params
   optParams <- res$params[1:res$lenP]
+
   nH <- res$lenP/(d+1) # number of hyperplanes
   aOpt <- matrix(optParams[1:(d*nH)],nH,d)
   bOpt <- optParams[(d*nH+1):length(optParams)]

@@ -24,7 +24,7 @@
 #'
 #' @example Examples/correctIntegral
 
-fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0) {
+fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4, objEps = 1e-7, offset = 1e-1) {
 
   gamma = 1000
   n <- dim(X)[1]
@@ -75,7 +75,7 @@ fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0) {
 
   # call C code that optimizes the MLE objective with initial parameters params and paramsKernel
   # optimal set of parameters choosen inside the function
-  res <- callNewtonBFGSLC(X, w, params, paramsKernel, cvhParams, gamma, verbose)
+  res <- callNewtonBFGSLC(X, w, params, paramsKernel, cvhParams, gamma, verbose, intEps, objEps, offset)
   result <- correctIntegral(X, mu, res$a, res$b, cvhParams$cvh);
   logLike = result$logMLE * t(w) * length(w);
 

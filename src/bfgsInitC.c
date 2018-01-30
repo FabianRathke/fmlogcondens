@@ -6,14 +6,14 @@
 #include <R.h>
 #include <headers.h>
 
-void sumGrad(double* grad, float* gradA, float* gradB, int n) {
+void sumGrad(double* grad, double* gradA, double* gradB, int n) {
 	int i;
 	for (i=0; i < n; i++) {
-		grad[i] = (double) (gradA[i] + gradB[i]);
+		grad[i] = (gradA[i] + gradB[i]);
 	}
 }
 
-void calcGradFloatAVXCaller(float *X, float* XW, float *grid, float* a, float* b, float gamma, float weight, float* delta, int n, int dim, int nH, int M, float* gradA, float* gradB, float* TermA, float* TermB, double* influence, unsigned short int* YIdx) {
+void calcGradFloatAVXCaller(float *X, float* XW, float *grid, double* a, double* b, float gamma, float weight, float* delta, int n, int dim, int nH, int M, double* gradA, double* gradB, double* TermA, double* TermB, double* influence, unsigned short int* YIdx) {
     
     for (int i = 0; i < nH; i++) {
         influence[i] = 0;
@@ -22,8 +22,8 @@ void calcGradFloatAVXCaller(float *X, float* XW, float *grid, float* a, float* b
     modn = n%8; modM = M%8;
 	
 	// set gradients to zero
-	memset(gradA,0,nH*(dim+1)*sizeof(float));
-	memset(gradB,0,nH*(dim+1)*sizeof(float));
+	memset(gradA,0,nH*(dim+1)*sizeof(double));
+	memset(gradB,0,nH*(dim+1)*sizeof(double));
 	// set TermA and TermB to zero
 	*TermA = 0; *TermB = 0;
 
@@ -41,12 +41,6 @@ void calcGradFloatAVXCaller(float *X, float* XW, float *grid, float* a, float* b
  * 			int lenP			size of paramsInit
  * 			int n				number of samples
  * */
-
-void newtonBFGSLInitCTest(double* X,  double* XW, double* box, double* params, int *dim_, int *lenP_, int *n_, double* ACVH, double* bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double* logLike) {
-
-	Rprintf("dim: %d, lenP: %d, N: %d, lenCVH: %d\n",*dim_,*lenP_, *n_, *lenCVH_);
-	Rprintf("intEps: %.4e, lambdaSqEps: %.4e\n",*intEps_, *lambdaSqEps_);
-}
 
 void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *dim_, int *lenP_, int *n_, double* ACVH, double* bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double* logLike) {
 
@@ -82,13 +76,13 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 		gridFloat[i] = grid[i*NGrid*MGrid];
 	}
 	// two points for a and b: slope and bias of hyperplanes
-	float *a = malloc(nH*dim*sizeof(float));
-	float *b = malloc(nH*sizeof(float));
+	double *a = malloc(nH*dim*sizeof(double));
+	double *b = malloc(nH*sizeof(double));
 
     float *XF = malloc(n*dim*sizeof(float));    for (i=0; i < n*dim; i++) { XF[i] = X[i]; }
     float *XWF = malloc(n*sizeof(float)); for (i=0; i < n; i++) { XWF[i] = XW[i]; }
 
-	unzipParamsFloat(params,a,b,dim,nH,1);
+	unzipParams(params,a,b,dim,nH,1);
 
 	double *influence = malloc(nH*sizeof(double));
 	double alpha = 1e-4, beta = 0.1;
@@ -98,12 +92,11 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 	double *gradOld = malloc(nH*(dim+1)*sizeof(double));
 	double *newtonStep = malloc(nH*(dim+1)*sizeof(double));
 	double *paramsNew = malloc(lenP*sizeof(double));
-	float *gradA = calloc(nH*(dim+1),sizeof(float));
-	float *gradB = calloc(nH*(dim+1),sizeof(float));
-	float *TermA = calloc(1,sizeof(float));
-	float *TermB = calloc(1,sizeof(float));
-	float TermAOld, TermBOld, funcVal, funcValStep;
-	float lastStep;
+	double *gradA = calloc(nH*(dim+1),sizeof(double));
+	double *gradB = calloc(nH*(dim+1),sizeof(double));
+	double *TermA = calloc(1,sizeof(double));
+	double *TermB = calloc(1,sizeof(double));
+	double TermAOld, TermBOld, funcVal, funcValStep, lastStep;
 	calcGradFloatAVXCaller(XF, XWF, gridFloat, a, b, gamma, weight, delta, n, dim, nH, lenY, gradA, gradB, TermA, TermB, influence, YIdx);
 	sumGrad(grad,gradA,gradB,nH*(dim+1));
 	
@@ -132,7 +125,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 		TermAOld = *TermA; TermBOld = *TermB; funcVal = TermAOld + TermBOld; copyVector(gradOld,grad,nH*(dim+1),0);
 		// new parameters
 		for (i=0; i < lenP; i++) { paramsNew[i] = params[i] + newtonStep[i]; }
-		unzipParamsFloat(paramsNew,a,b,dim,nH,1);
+		unzipParams(paramsNew,a,b,dim,nH,1);
 		// calculate gradient and objective function value
 		calcGradFloatAVXCaller(XF, XWF, gridFloat, a, b, gamma, weight, delta, n, dim, nH, lenY, gradA, gradB, TermA, TermB, influence, YIdx);
 		sumGrad(grad,gradA,gradB,(dim+1)*nH);
@@ -146,7 +139,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 			for (i=0; i < lenP; i++) {
 				paramsNew[i] = params[i] + (newtonStep[i]*step);
 			}
-			unzipParamsFloat(paramsNew,a,b,dim,nH,1);
+			unzipParams(paramsNew,a,b,dim,nH,1);
 
 			calcGradFloatAVXCaller(XF, XWF, gridFloat, a, b, gamma, weight, delta, n, dim, nH, lenY, gradA, gradB, TermA, TermB, influence, YIdx);
 			sumGrad(grad,gradA,gradB,(dim+1)*nH);

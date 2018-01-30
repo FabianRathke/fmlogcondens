@@ -4,7 +4,7 @@
 #include <omp.h>
 #include <float.h>
 
-void calcGradFloatC(float* gradA, float* gradB, double* influence, float* TermA, float* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, float* a, float* b, float gamma, float weight, float* delta, int N, int NIter, int M, int dim, int nH)
+void calcGradFloatC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, double* a, double* b, float gamma, float weight, float* delta, int N, int NIter, int M, int dim, int nH)
 {
 	float *grad_st_tmp = calloc(nH*(dim+1),sizeof(float));
 	float *aGamma = malloc(dim*nH*sizeof(float)); 

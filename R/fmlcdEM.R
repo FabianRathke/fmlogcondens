@@ -14,10 +14,6 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
       y[, i] <- dmvnorm(x, mean=apply(ss, 2, mean), sigma=var(ss), log=TRUE)
     }
 
-    if (verbose > 0) {
-      print(sprintf("Iter 0: Log-Likelihood = %.4f",  sum(log(exp(y) %*% t(t(props))))))
-    }
-
     pif <- t(t(exp(y)) * props)
     posterior <- pif / apply(pif, 1, sum)
   }
@@ -30,6 +26,10 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
   logLike <- matrix(0, maxIter, 1)
   densEst <- matrix(0, n, K)
   params <- matrix(list(), 1, 2)
+  # optimization parameters
+  intEps = 1e-4
+  objEps = 1e-7
+  offset = 1e-1
 
   # initialize both densities; after that use previous parameters for initialization
   for (j in 1:K) {
@@ -64,7 +64,7 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
     for (j in 1:K) {
       sampleWeights <- posterior[, j] / sum(posterior[, j])
       sampleWeights[sampleWeights < 1e-8 / n] <- 0
-      r <- callNewtonBFGSLC(X, sampleWeights, params[[j]], matrix(0, 0, 0), cvhParams, gamma, verbose - 1)
+      r <- callNewtonBFGSLC(X, sampleWeights, params[[j]], matrix(0, 0, 0), cvhParams, gamma, verbose - 1, intEps, objEps, offset)
 
       result <- correctIntegral(X, rep(0,2), r$a, r$b, cvhParams$cvh);
       params[[j]] <- c(result$a, result$b)

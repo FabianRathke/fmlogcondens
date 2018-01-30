@@ -1,4 +1,4 @@
-callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma, verbose) {
+callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma, verbose, intEps = 1e-4, objEps = 1e-7, offset = 1e-1) {
   n <- dim(X)[1]
   d <- dim(X)[2]
 
@@ -15,9 +15,9 @@ callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma, verb
               as.double(cvhParams$ACVH),
               as.double(cvhParams$bCVH),
               as.integer(length(cvhParams$bCVH)),
-              as.double(1e-4),
-              as.double(1e-7),
-              as.double(1e-1),
+              as.double(intEps),
+              as.double(objEps),
+              as.double(offset),
               as.integer(verbose),
               as.double(gamma))
   # res$lenP denotes the number of active parameters in res$params

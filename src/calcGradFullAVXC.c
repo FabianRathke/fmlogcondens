@@ -92,7 +92,7 @@ void inline calcInfluence(int numElements, int* idxElements, float* ftInner, flo
 }
 
 
-void calcGradFullAVXC(float* gradA, float* gradB, double* influence, float* TermA, float* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, float* a, float* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH)
+void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH)
 {
 	/* create aligned memory */
 /*	float *aGamma = memalign(ALIGN,dim*nH*sizeof(float));

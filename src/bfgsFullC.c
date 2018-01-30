@@ -62,100 +62,6 @@ void cumsum(int* numEntriesCumSum, int* numEntries, int n) {
 	}
 }
 
-void newtonBFGSLTest(double *X,  double *XW, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_) {
-	int lenPB = *lenPB_, dim = *dim_, n = *n_, lenCVH = *lenCVH_, verbose = *verbose_;
-	double intEps = *intEps_, lambdaSqEps = *lambdaSqEps_, cutoff = *cutoff_;
-
-	Rprintf("LenP: %d, lenPB: %d, dim: %d, n: %d, lenCVH: %d, verbose: %d\n",*lenP, lenPB, dim, n, lenCVH, verbose);
-	Rprintf("intEps: %.2e, lambdaSqEps: %.2e, cutoff: %.2e\n",intEps, lambdaSqEps, cutoff);
-	
-	omp_set_num_threads(omp_get_max_threads());
-	if (verbose > 1) {
-		Rprintf("Using %d threads\n",omp_get_max_threads());
-	}
-	//omp_set_num_threads(2);
-	//Rprintf("%d, %d\n",omp_get_num_procs(), omp_get_max_threads());
-
-	int i;
-	double timeA = cpuSecond();
-	
-	/*for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",X[i]);
-	}
-	for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",XW[i]);
-	}
-
-	for (i=0; i < 2*dim; i++) {
-		Rprintf("%.4f\n",box[i]);
-	}
-
-	for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",params_[i]);
-	}
-
-	for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",paramsB[i]);
-	}
-	for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",ACVH[i]);
-	}
-	for (i=0; i < 10; i++) {
-		Rprintf("%.4f\n",bCVH[i]);
-	}*/
-
-	// create the integration grid
-    int lenY, numBoxes = 0;
-	int *numPointsPerBox; unsigned short int *YIdx, *XToBox; double *boxEvalPoints; 
-
-	// obtain grid density params
-	int NGrid, MGrid;
-    double weight = 0; 
-    double *grid = NULL;
-    setGridDensity(box,dim,0,&NGrid,&MGrid,&grid,&weight);
-
-	Rprintf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
-	makeGridC(X,&YIdx,&XToBox,&numPointsPerBox,&boxEvalPoints,ACVH,bCVH,box,&lenY,&numBoxes,dim,lenCVH,NGrid,MGrid,n);
-	Rprintf("Obtained grid with %d points and %d boxes\n",lenY,numBoxes);
-
-	float *boxEvalPointsFloat = malloc(numBoxes*dim*3*sizeof(float));
-	for (i=0; i < numBoxes*dim*3; i++) { boxEvalPointsFloat[i] = (float) boxEvalPoints[i]; }
-	// only the first entry in each dimension is required
-	float *gridFloat = malloc(dim*sizeof(float));
-	double *gridDouble = malloc(dim*sizeof(double));
-	for (i=0; i < dim; i++) {
-		gridFloat[i] = grid[i*NGrid*MGrid];
-		gridDouble[i] = (double) grid[i*NGrid*MGrid];
-	}
-
-	float *delta = malloc(dim*sizeof(float));
-	double *deltaD = malloc(dim*sizeof(double));
-	for (i=0; i < dim; i++) {
-		delta[i] = grid[NGrid*MGrid*i+1] - grid[NGrid*MGrid*i];
-		deltaD[i] = grid[NGrid*MGrid*i+1] - grid[NGrid*MGrid*i];
-	}
-	
-	float *XF = malloc(n*dim*sizeof(float)); 	for (i=0; i < n*dim; i++) { XF[i] = X[i]; }
-	float *XWF = malloc(n*sizeof(float)); for (i=0; i < n; i++) { XWF[i] = XW[i]; }
-	double gamma = 1000, timer;
-
-	//choose between initializations
-	int nH  = (int) *lenP/(dim+1);
-	double *gradA = calloc(*lenP,sizeof(double));
-	double *gradB = calloc(*lenP,sizeof(double));
-	double *TermA = calloc(1,sizeof(double));
-	double *TermB = calloc(1,sizeof(double));
-	double *a = malloc(nH*dim*sizeof(double));
-	double *b = malloc(nH*sizeof(double));
-	double *influence = malloc(nH*sizeof(double));
-	unzipParams(params_,a,b,dim,nH,1);
-	Rprintf("%d\n",nH);
-	calcGradAVXC(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
-	double initA = *TermA + *TermB;
-
-	Rprintf("%.4f, %.4f\n",*TermA, *TermB);
-}
-
 typedef struct {
     int id;
     int XToBox;
@@ -167,6 +73,14 @@ int compare (const void * a, const void * b)
   point *pointB = (point *)b;
 
   return ( pointA->XToBox - pointB->XToBox );
+}
+
+void callOptimization(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, unsigned short int *XToBox, int numBoxes, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH) {
+#ifdef __AVX__  
+	calcGradAVXC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,delta,N,M,dim,nH);
+#else
+    calcGradFloatC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,N,N,M,dim,nH);
+#endif
 }
 
 
@@ -267,7 +181,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	double *b = malloc(nH*sizeof(double));
 	double *influence = malloc(nH*sizeof(double));
 	unzipParams(params_,a,b,dim,nH,1);
-	calcGradAVXC(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
+	callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 	double initA = *TermA + *TermB;
 
 	double *params = NULL;
@@ -283,7 +197,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		double *influenceB = malloc(nHB*sizeof(double));
 
 		unzipParams(paramsB,aB,bB,dim,nHB,1);
-		calcGradAVXC(gradAB,gradBB,influenceB,TermAB,TermBB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,aB,bB,gamma,weight,delta,n,lenY,dim,nHB);
+		callOptimization(gradAB,gradBB,influenceB,TermAB,TermBB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,aB,bB,gamma,weight,delta,n,lenY,dim,nHB);	
 		double initB = *TermAB + *TermBB;
 
 		if (initA < initB) {
@@ -452,7 +366,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		if (mode == 0) { // normal mode
 			if (type == 0) { // single
 				unzipParams(paramsNew,a,b,dim,nH,1);
-				calcGradAVXC(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
+				callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 			} else { // double
 				unzipParams(paramsNew,a,b,dim,nH,0);
 				calcGradC(gradA,gradB,influence,TermA,TermB,X,XW,gridDouble,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,deltaD,n,lenY,dim,nH,MGrid);
@@ -479,7 +393,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 				memcpy(gradCheck,grad,*lenP*sizeof(double));
 				if (type == 0) {
 					unzipParams(paramsNew,a,b,dim,nH,1);
-					calcGradAVXC(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
+					callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 				} else {
 					unzipParams(paramsNew,a,b,dim,nH,0);
 					calcGradC(gradA,gradB,influence,TermA,TermB,X,XW,gridDouble,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,deltaD,n,lenY,dim,nH,MGrid);
@@ -505,7 +419,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 			if (mode == 0) {
 				if (type == 0) {
 					unzipParams(paramsNew,a,b,dim,nH,1);
-					calcGradAVXC(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
+					callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 				} else {
 					unzipParams(paramsNew,a,b,dim,nH,0);
 					calcGradC(gradA,gradB,influence,TermA,TermB,X,XW,gridDouble,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,deltaD,n,lenY,dim,nH,MGrid);

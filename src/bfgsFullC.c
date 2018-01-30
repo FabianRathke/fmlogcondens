@@ -185,10 +185,10 @@ int compare (const void * a, const void * b)
  * 			double lambdaSqEps	minimal progress of the optimization in terms of objective function value
  * 			double cutoff		threshold for removing inactive hyperplanes.
  * */
-void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_) {
+void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_, double *gamma_) {
 
 	int lenPB = *lenPB_, dim = *dim_, n = *n_, lenCVH = *lenCVH_, verbose = *verbose_;
-	double intEps = *intEps_, lambdaSqEps = *lambdaSqEps_, cutoff = *cutoff_;
+	double intEps = *intEps_, lambdaSqEps = *lambdaSqEps_, cutoff = *cutoff_, gamma = *gamma_;
 
 	omp_set_num_threads(omp_get_max_threads());
 	if (verbose > 1) {
@@ -255,7 +255,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	
 	float *XF = malloc(n*dim*sizeof(float)); 	for (i=0; i < n*dim; i++) { XF[i] = X[i]; }
 	float *XWF = malloc(n*sizeof(float)); for (i=0; i < n; i++) { XWF[i] = XW[i]; }
-	double gamma = 1000, timer;
+	double timer;
 
 	//choose between initializations
 	int nH  = (int) *lenP/(dim+1);

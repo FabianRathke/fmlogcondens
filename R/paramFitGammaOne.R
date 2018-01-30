@@ -36,20 +36,8 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
     a <- runif(m * d, 0, 0.1)
     b <- runif(m)
     params <- c(a, b)
-    r <- .C("newtonBFGSLInitC",
-              as.double(X),
-              as.double(w),
-              as.double(c(apply(X, 2, min),apply(X, 2, max))),
-              params = as.double(params),
-              as.integer(d),
-              as.integer(length(params)),
-              as.integer(n),
-              as.double(ACVH),
-              as.double(bCVH),
-              as.integer(length(bCVH)),
-              as.double(1e-3),
-              as.double(1e-6),
-              logLike = as.double(matrix(0, 1)))
+    r <- callNewtonBFGSLInitC(X, w, params, ACVH, bCVH)
+    # check for best initialization
     if (r$logLike < minLogLike) {
       optParams <- r$params
       minLogLike <- r$logLike
@@ -59,27 +47,13 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
   aOpt <- matrix(optParams[1:(m * d)], m, d)
   bOpt <- rep(optParams[(m * d + 1):length(optParams)])
 
-  yT <- matrix(-log(apply(exp(aOpt %*% t(X) + matrix(rep(bOpt, n), length(bOpt), n)), 2, sum)), n, 1)
+  y <- matrix(-log(apply(exp(aOpt %*% t(X) + matrix(rep(bOpt, n), length(bOpt), n)), 2, sum)), n, 1)
   idxCVH <- unique(as.vector(cvh))
-  P <- matrix(c(X, yT), nrow = n)
-  Q <- matrix(c(X[idxCVH, ], rep(min(yT[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-  T <- geometry::convhulln(rbind(P, Q))
-  T <- T[!(apply(T, 1, max) > n), ]
+  P <- matrix(c(X, y), nrow = n)
+  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
 
-  nH = dim(T)[1]
-  # normalize density to one for exact integral
-  r <- .C("calcExactIntegralC",
-            as.double(t(X)),
-            as.double(yT),
-            as.integer(t(T-1)),
-            as.integer(nH),
-            as.integer(n),
-            as.integer(d),
-            as.double(1),
-            as.double(0.01),
-            a = as.double(matrix(0,nH * d)),
-            b = as.double(matrix(0,nH)))
-
+  # normalize parameters to one for log-concave density
+  r <- callCalcExactIntegralC(X, y, P, Q, 1e-2)
   aOpt <-t(matrix(r$a, d, length(r$a) / d))
   bOpt <- r$b
 
@@ -90,7 +64,8 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
     bOpt <- bOpt[idxSelect]
   }
 
-  # detect if all hyerplanes where intitialized to the same parameters; happens for small sample sizes --> very slow convergence in the final optimization
+  # detect if all hyerplanes where intitialized to the same parameters;
+  # happens for small sample sizes --> very slow convergence in the final optimization
   idxCheck <- sample(length(bOpt), min(100, length(bOpt)))
   if (mean(apply(aOpt[idxCheck, ], 2, var)) < 1e-4 || length(bOpt) == 1) {
     print('#### Bad initialization due to small sample size, switch to kernel kensity based initialization ####');

@@ -24,29 +24,15 @@ paramFitKernelDensity <- function(X, w, cvh, h = apply(X, 2, sd) * n ** (-1 / (d
 
   # C-function that calculates the kernel density
   r <- .C("calcKernelDens", X = t(X), sampleWeights = w, yT = matrix(0, n), h = h, n = n, d = d)
-  yT = log(r$yT)
+  y = log(r$yT)
 
   # find upper convex hull of X and y
-  finiteVals <- is.finite(yT)
+  finiteVals <- is.finite(y)
   idxCVH <- setdiff(unique(as.vector(cvh)), which(!finiteVals))
-  P <- matrix(c(X[finiteVals, ], yT[finiteVals]), nrow = length(finiteVals))
-  Q <- matrix(c(X[idxCVH, ], rep(min(yT[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-  T <- geometry::convhulln(rbind(P, Q))
-  T <- T[!(apply(T, 1, max) > length(finiteVals)), ]
-
-  # calls a C function that modifies yT such that the resulting log-concave density defined by X and y
-  # normalizes to one
-  r <- .C(  "calcExactIntegralC",
-          as.double(t(X[finiteVals, ])),
-          as.double(yT[finiteVals]),
-          as.integer(t(T-1)),
-          as.integer(dim(T)[1]),
-          as.integer(length(finiteVals)),
-          as.integer(d),
-          as.double(1),
-          as.double(0.01),
-          a = as.double(matrix(0, nrow(T) * d)),
-          b = as.double(matrix(0, nrow(T))))
+  P <- matrix(c(X[finiteVals, ], y[finiteVals]), nrow = length(finiteVals))
+  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
+  # normalize parameters to one for log-concave density
+  r <- callCalcExactIntegralC(X[finiteVals, ], y[finiteVals], P, Q, 1e-2)
 
   return(c(t(matrix(r$a, d, length(r$a) / d)), r$b))
   }

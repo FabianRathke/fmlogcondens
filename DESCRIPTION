@@ -12,7 +12,8 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     geometry,
-    MASS
+    MASS,
+	mvtnorm
 Suggests:
     LogConcDEAD,
     logcondens,

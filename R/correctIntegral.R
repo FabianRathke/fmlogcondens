@@ -46,22 +46,9 @@ correctIntegral <- function(X, mu, a, b, cvh) {
   idxCVH <- unique(as.vector(cvh))
   P <- matrix(c(X, t(y)), nrow = n)
   Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-  T <- geometry::convhulln(rbind(P, Q))
-  T <- T[!(apply(T,1,max) > n), ]
 
   X <- X + t(matrix(rep(mu,n), 2, n))
-
-  r <- .C(  "calcExactIntegralC",
-            as.double(t(X)),
-            y = as.double(y),
-            as.integer(t(T-1)),
-            as.integer(dim(T)[1]),
-            as.integer(n),
-            as.integer(d),
-            as.double(1),
-            as.double(1e-10),
-            a = as.double(matrix(0,dim(T)[1] * d)),
-            b = as.double(matrix(0,dim(T)[1])))
+  r <- callCalcExactIntegralC(X,y,P,Q,1e-10)
 
   aOptNew <- t(matrix(r$a, d, length(r$a) / d))
   bOptNew <- r$b
@@ -72,5 +59,5 @@ correctIntegral <- function(X, mu, a, b, cvh) {
     warning('Potential numerical problems when calculating the final set of hyperplanes --> Recommended to run the optimization again')
   }
 
-  return(list("aOpt" = aOptNew, "bOpt" = bOptNew, "aOptSparse" = aOptSparse, "bOptSparse" = bOptSparse, "y" = r$y))
+  return(list("a" = aOptNew, "b" = bOptNew, "aSparse" = aOptSparse, "bSparse" = bOptSparse, "logMLE" = r$y))
 }

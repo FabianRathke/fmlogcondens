@@ -22,7 +22,3 @@ A list consisting of parameters describing the convex hull of X:
   (one row per face) as well as the parameters of the hyperplanes that
   describe these faces.
 }
-\examples{
-calcCvxHullFaces(matrix(rnorm(200),100,2)) # calculates convex hull
-  parameters for a 100 points in 2-D
-}

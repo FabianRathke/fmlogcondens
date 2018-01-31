@@ -1,4 +1,32 @@
-callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma, verbose, intEps = 1e-4, objEps = 1e-7, offset = 1e-1) {
+#' @title Optimize MLE objective for a log-concave density
+#'
+#' @description \code{callNewtonBFGSLC} executes the quasi-Newton
+#'   optimization of the maximum likelihood estimator for a log-concave
+#'   density f(x). Calls a underlying C function.
+#'
+#' @param X Set of data points (one sample per row)
+#' @param w Vector of sample weights
+#' @param params Vector of initial hyperplane parameters
+#' @param paramsKernel Alternative vector of initial hyperplane parameters
+#' @param cvhParams List that contains parametrization of the
+#'   convex hull of X in terms of its faces
+#' @param gamma Parameters that governs the smoothness of the log-concave
+#'   density (default: 1000)
+#' @param verbose The amount of information printed during the optimization;
+#'   valid levels are {0,1,2} (default: 0)
+#' @param intEps Threshold of the numerical integration error below which the
+#'   optimization may terminite (default: 1e-3)
+#' @param objEps Threshold of the size of the function step taken below which
+#'   the optimziation may terminite (default: 1e-7)
+#' @param offset Threshold that governs how fast inactive hyperplanes are dropped;
+#'   smaller values correspond to a slower rate of hyperplane deletion
+#'   (default: 1e-1)
+#'
+#' @return List of n hyperplanes that describe the upper convex hull of log(f(x))
+#'   \item{a}{Slopes of hyerplanes (n x d matrix)}
+#'   \item{b}{Offsets of hyperplanes}
+
+callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma=1000, verbose=0, intEps = 1e-3, objEps = 1e-7, offset = 1e-1) {
   n <- dim(X)[1]
   d <- dim(X)[2]
 
@@ -29,6 +57,21 @@ callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma, verb
   return(list("a" = a, "b" = b))
 }
 
+#' @title Optimize MLE objective for smooth a log-concave density
+#'
+#' @description \code{callNewtonBFGSLInitC} is similar as \code{callNewtonBFGSLC}
+#'   but optimizies a smooth log-concave density f(x) with parameter gamma=1. Due to
+#'   numerical reasons a different set of C functions is used.
+#'
+#' @param X Set of data points (one sample per row)
+#' @param w Vector of sample weights
+#' @param params Vector of initial hyperplane parameters
+#' @inheritParams paramFitGammaOne
+#'
+#' @return List containing the optimal parameters as well as the log likelihood
+#'   \item{params}{Stacked vector of hyperplane slopes and offsets}
+#'   \item{logLike}{Vector containing function evaluations log(f(x_i))}
+
 callNewtonBFGSLInitC <- function (X, w, params, ACVH, bCVH) {
   n <- dim(X)[1]
   d <- dim(X)[2]
@@ -50,7 +93,16 @@ callNewtonBFGSLInitC <- function (X, w, params, ACVH, bCVH) {
   return(r)
 }
 
-callCalcExactIntegralC <- function(X, y, P, Q, eps) {
+
+
+callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
+
+  idxCVH <- setdiff(unique(as.vector(cvh)), which(!filter))
+  P <- matrix(c(X[filter, ], y[filter]), nrow = length(filter))
+  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
+
+  X = X[filter, ]
+  y = y[filter]
 
   n <- dim(X)[1]
   d <- dim(X)[2]
@@ -69,6 +121,6 @@ callCalcExactIntegralC <- function(X, y, P, Q, eps) {
           as.double(eps),
           a = as.double(matrix(0, dim(T)[1] * d)),
           b = as.double(matrix(0, dim(T)[1])))
-
+  r$a = t(matrix(r$a, d, length(r$a) / d))
   return(r)
 }

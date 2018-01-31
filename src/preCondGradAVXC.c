@@ -387,7 +387,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 		#pragma omp single
 		{   
 			if (**elementListSize < counter) {
-				printf("Reallocate elementList\n");
+				Rprintf("Reallocate elementList\n");
 				
 				int *tmp = realloc(*elementList,counter*sizeof(int));
 				if (tmp != NULL) {

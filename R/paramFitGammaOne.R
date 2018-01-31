@@ -21,7 +21,7 @@
 #'   row constitutes the normal vector of a face} \item{b}{A vector where each
 #'   entry constitutes the offset of a face}
 #'
-#' @example Examples/paramFitGammaOne
+#' @example R/Examples/paramFitGammaOne
 
 
 paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
@@ -48,13 +48,9 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
   bOpt <- rep(optParams[(m * d + 1):length(optParams)])
 
   y <- matrix(-log(apply(exp(aOpt %*% t(X) + matrix(rep(bOpt, n), length(bOpt), n)), 2, sum)), n, 1)
-  idxCVH <- unique(as.vector(cvh))
-  P <- matrix(c(X, y), nrow = n)
-  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-
-  # normalize parameters to one for log-concave density
-  r <- callCalcExactIntegralC(X, y, P, Q, 1e-2)
-  aOpt <-t(matrix(r$a, d, length(r$a) / d))
+  # analytically normalize log-concave density
+  r <- callCalcExactIntegralC(X, y, cvh, rep(TRUE,length(y)), 1e-2)
+  aOpt <- r$a
   bOpt <- r$b
 
   # limit the number of hyperplanes for 1D to 1000

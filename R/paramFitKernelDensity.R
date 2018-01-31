@@ -16,7 +16,7 @@
 #'   row constitutes the normal vector of a face} \item{b}{A vector where each
 #'   entry constitutes the offset of a face}
 #'
-#' @example Examples/paramFitKernelDensity
+#' @example R/Examples/paramFitKernelDensity
 
 paramFitKernelDensity <- function(X, w, cvh, h = apply(X, 2, sd) * n ** (-1 / (d+4))) {
   n <- dim(X)[1]
@@ -28,11 +28,8 @@ paramFitKernelDensity <- function(X, w, cvh, h = apply(X, 2, sd) * n ** (-1 / (d
 
   # find upper convex hull of X and y
   finiteVals <- is.finite(y)
-  idxCVH <- setdiff(unique(as.vector(cvh)), which(!finiteVals))
-  P <- matrix(c(X[finiteVals, ], y[finiteVals]), nrow = length(finiteVals))
-  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
-  # normalize parameters to one for log-concave density
-  r <- callCalcExactIntegralC(X[finiteVals, ], y[finiteVals], P, Q, 1e-2)
+  # analytically normalize log-concave density
+  r <- callCalcExactIntegralC(X, y, cvh, finiteVals, 1e-2)
 
-  return(c(t(matrix(r$a, d, length(r$a) / d)), r$b))
+  return(c(r$a, r$b))
   }

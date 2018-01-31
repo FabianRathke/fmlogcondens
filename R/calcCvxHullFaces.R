@@ -11,10 +11,6 @@
 #'   \item{ACVH}{A matrix where each row constitutes the normal vector of a
 #'   face} \item{bCVH}{A vector where each entry constitutes the offset of the
 #'   hyperplane for a face}
-#'
-#' @examples
-#' calcCvxHullFaces(matrix(rnorm(200),100,2)) # calculates convex hull
-#'   parameters for a dataset of 100 points in 2-D
 
 calcCvxHullFaces <-function(X) {
 

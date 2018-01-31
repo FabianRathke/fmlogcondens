@@ -10,14 +10,26 @@ fmlcd(X, w = rep(1/nrow(X), nrow(X)), init = "", verbose = 0,
 \arguments{
 \item{X}{Matrix of data points (one sample per row)}
 
-\item{w}{Vector of sample weights}
+\item{w}{Vector of sample weights (default: uniform weights)}
 
-\item{init}{String determining the initialization approach ('kernel' based on
+\item{init}{String that sets the initialization approach. 'kernel' based on
 kernel density, 'smooth' based on smooth log-concave density, '' compares
-both and takes the optimal one)}
+both and takes the optimal one. (default: '')}
 
-\item{verbose}{Int determining the verboseness of the code (0 (no output)
-to 3)}
+\item{verbose}{Int determining the verboseness of the code; 0 = no output
+to 3. (default: 0)}
+
+\item{intEps}{Stopping criteria for the numerical integration accuracy
+Optimization stops if both measurements are smaller than intEps and objEps
+Modification of this value is not recommended. (default: 1e-3)}
+
+\item{objEps}{Stopping criteria for the change in the objective function
+Optimization stops if both measurements are smaller than intEps and objEps
+Modification of this value is not recommended. (default: 1e-7)}
+
+\item{offset}{Smaller values correspond to slower hyperplane reduction.
+Offset should be a value smaller than 1. Modification of this value is not
+recommended. (default: 1e-1)}
 }
 \value{
 Parametrization of f(x) in terms of hyperplanes and function

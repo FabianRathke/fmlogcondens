@@ -33,8 +33,7 @@ void resizeArray(double** array, int* keepIdx, int nNew, int n, int dim) {
     // realloc array; use temporary pointer to check for failure
     double *newArray = realloc(*array, nNew*dim*sizeof(double));
     if (newArray == NULL && nNew > 0) {
-        Rprintf("Array reallocation failed\n");
-        exit(0);
+        error("Array reallocation failed\n");
     }
     *array = newArray;
 }
@@ -48,8 +47,7 @@ void resizeCNSarray(double **a, int c, int c_, int activeCol, int lenP, int m) {
 	}
 	double *newArray = realloc(*a,m*lenP*sizeof(double));
  	if (newArray == NULL && m*lenP > 0) {
-        Rprintf("Array reallocation failed\n");
-        exit(0);
+        error("Array reallocation failed\n");
     }
 	*a = newArray;
 }
@@ -80,6 +78,16 @@ void callOptimization(double* gradA, double* gradB, double* influence, double* T
 	calcGradAVXC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,delta,N,M,dim,nH);
 #else
     calcGradFloatC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,N,N,M,dim,nH);
+#endif
+}
+
+
+void callPreConditioner(int** elementList, int** elementListSize, int* numEntries, int* maxElement, int* idxEntries, float* X, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, int numBoxes, double* a, double* aTrans, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH, int MBox) {
+#ifdef __AVX__
+	preCondGradAVXC(elementList,elementListSize,numEntries,maxElement,idxEntries,X,grid,YIdx,numPointsPerBox,boxEvalPoints,numBoxes,a,aTrans,b,gamma,weight,delta,N,M,dim,nH);
+#else
+	preCondGradFloatC(elementList,elementListSize,numEntries,maxElement,idxEntries,X,grid,YIdx,numPointsPerBox,boxEvalPoints,numBoxes,a,aTrans,b,gamma,weight,delta,N,M,dim,nH,MBox);
+
 #endif
 }
 
@@ -292,9 +300,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 				*lenP = nH*(dim+1);
 
 				if (mode==1) { // update list of active hyperplanes for all samples/grid points 
-					unzipParams(params,aTrans,b,dim,nH,1);
-					unzipParams(params,a,b,dim,nH,0);
-					preCondGradAVXC(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH); 
+					unzipParams(params,aTrans,b,dim,nH,1); 	unzipParams(params,a,b,dim,nH,0);
+					callPreConditioner(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH,MGrid); 
 					cumsum(numEntriesCumSum,numEntries,n+lenY);
 
 					if (counterActive < nH-5*nH/100) {
@@ -342,9 +349,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 			idxEntries = malloc(lenY*sizeof(int));
 			aTrans = malloc(nH*dim*sizeof(double));
 			// we require both the transposed and the normal variant of a
-			unzipParams(params,aTrans,b,dim,nH,1);
-			unzipParams(params,a,b,dim,nH,0);
-			preCondGradAVXC(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH); 
+			unzipParams(params,aTrans,b,dim,nH,1); unzipParams(params,a,b,dim,nH,0);
+			callPreConditioner(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH,MGrid); 
 			cumsum(numEntriesCumSum,numEntries,n+lenY);
 		}
 
@@ -383,9 +389,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 			// update elementlist
 			if (updateList < 0) {
 			   	//Rprintf("Update elementList\n");
-				unzipParams(paramsNew,aTrans,b,dim,nH,1);
-            	unzipParams(paramsNew,a,b,dim,nH,0);
-				preCondGradAVXC(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH); 
+				unzipParams(paramsNew,aTrans,b,dim,nH,1); unzipParams(paramsNew,a,b,dim,nH,0);
+				callPreConditioner(&elementList,&elementListSize,numEntries,maxElement,idxEntries,XF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,numBoxes,a,aTrans,b,gamma,weight,delta,n,lenY,dim,nH,MGrid); 
 				cumsum(numEntriesCumSum,numEntries,n+lenY);
 
 				// check whether the control interval has to be reduced

@@ -8,12 +8,21 @@
 #'   parametrization in terms of a set of hyperplanes is returned.
 #'
 #' @param X Matrix of data points (one sample per row)
-#' @param w Vector of sample weights
-#' @param init String determining the initialization approach ('kernel' based on
+#' @param w Vector of sample weights (default: uniform weights)
+#' @param init String that sets the initialization approach. 'kernel' based on
 #'   kernel density, 'smooth' based on smooth log-concave density, '' compares
-#'   both and takes the optimal one)
-#' @param verbose Int determining the verboseness of the code (0 (no output)
-#'   to 3)
+#'   both and takes the optimal one. (default: '')
+#' @param verbose Int determining the verboseness of the code; 0 = no output
+#'   to 3. (default: 0)
+#' @param intEps Stopping criteria for the numerical integration accuracy
+#'   Optimization stops if both measurements are smaller than intEps and objEps
+#'   Modification of this value is not recommended. (default: 1e-3)
+#' @param objEps Stopping criteria for the change in the objective function
+#'   Optimization stops if both measurements are smaller than intEps and objEps
+#'   Modification of this value is not recommended. (default: 1e-7)
+#' @param offset Smaller values correspond to slower hyperplane reduction.
+#'   Offset should be a value smaller than 1. Modification of this value is not
+#'   recommended. (default: 1e-1)
 #'
 #' @return Parametrization of f(x) in terms of hyperplanes and function
 #'   evaluations y = log(f(x)) \item{aOpt, bOpt}{Analytically normalized
@@ -22,7 +31,7 @@
 #'   \sum(y_i)}).} \item{aOptSparse, bOptSparse}{Sparse parametrization
 #'   normalized on the integration grid.}
 #'
-#' @example Examples/correctIntegral
+#' @example R/Examples/correctIntegral
 
 fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4, objEps = 1e-7, offset = 1e-1) {
 

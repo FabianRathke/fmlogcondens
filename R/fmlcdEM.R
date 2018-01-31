@@ -10,8 +10,8 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
     y <- matrix(0, nrow=n, ncol=K)
     for(i in 1:K) {
       props[i] <- sum(class==i) / n
-      ss <- x[class==i, ]
-      y[, i] <- dmvnorm(x, mean=apply(ss, 2, mean), sigma=var(ss), log=TRUE)
+      ss <- X[class==i, ]
+      y[, i] <- mvtnorm::dmvnorm(X, mean=apply(ss, 2, mean), sigma=var(ss), log=TRUE)
     }
 
     pif <- t(t(exp(y)) * props)

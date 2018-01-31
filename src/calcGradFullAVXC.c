@@ -105,7 +105,7 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
 	errorVal += posix_memalign((void **) &bGamma, ALIGN, nH*sizeof(float));
 	errorVal += posix_memalign((void **) &XAligned, ALIGN, N*dim*sizeof(float));
 	errorVal += posix_memalign((void **) &XWAligned, ALIGN, N*sizeof(float));
-	if (errorVal != 0) { printf("Error when using posix_memalign\n"); }
+	if (errorVal != 0) { Rprintf("Error when using posix_memalign\n"); }
 
 	memcpy(XAligned,X,N*dim*sizeof(float));
 	memcpy(XWAligned,XW,N*sizeof(float));
@@ -128,8 +128,6 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
 
     #pragma omp parallel
     {   
-        /* const int nthreads = omp_get_num_threads();
-         * printf("Number of threads: %d\n",nthreads); */
         float *ftInner = memalign(ALIGN,8*nH*sizeof(float));
         float *grad_ft_private = calloc(nH*(dim+1),sizeof(float));
      	int *idxElements = malloc(nH*sizeof(int));

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <omp.h>
 #include <limits.h>
+#include <R.h>
 
 void getMN(int dim, int sparse, int* N, int* M) {
 	if (sparse) {
@@ -26,7 +27,7 @@ void getMN(int dim, int sparse, int* N, int* M) {
 			*N = 2; *M = 2;
 		} else {
 			*N = 1; *M = 1;
-			printf("Invalid dimension for sparse grid.\n");
+			Rprintf("Invalid dimension for sparse grid.\n");
 		}
 	} else {
 		if (dim==1) {
@@ -49,7 +50,7 @@ void getMN(int dim, int sparse, int* N, int* M) {
 			*N = 2; *M = 2;
 		} else {
 			*N = 2; *M = 2;
-			printf("Invalid dimension for dense grid.\n"); 
+			Rprintf("Invalid dimension for dense grid.\n"); 
 		}
 	}
 }

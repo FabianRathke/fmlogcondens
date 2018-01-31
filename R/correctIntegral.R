@@ -13,11 +13,11 @@
 #'   describing one face of conv(X)
 #'
 #' @return Normalized hyperplane parameters (for the uncentered \code{X <- X +
-#'   mu}) \item{aOpt, bOpt}{Hyperplane parameters of the normalized density.}
+#'   mu}) \item{a, b}{Hyperplane parameters of the normalized density.}
 #'   \item{y}{Vector with values y_i = log(f(X_)) of the normalized density.}
-#'   \item{aOptSparse, bOptSparse}{Input hyperplane parameters.}
+#'   \item{aSparse, bSparse}{Input hyperplane parameters.}
 #'
-#' @example Examples/correctIntegral
+#' @example R/Examples/correctIntegral
 
 correctIntegral <- function(X, mu, a, b, cvh) {
   n <- dim(X)[1]
@@ -39,25 +39,19 @@ correctIntegral <- function(X, mu, a, b, cvh) {
             b = as.double(matrix(0,dim(T)[1])))
 
   # sparse set of hyperplanes corrected for the mean
-  aOptSparse <- matrix(r$a, length(r$b), d)
-  bOptSparse <- r$b
+  aSparse <- matrix(r$a, length(r$b), d)
+  bSparse <- r$b
 
   y = apply(-a %*% t(X) - matrix(rep(b, n), length(b), n), 2, min)
-  idxCVH <- unique(as.vector(cvh))
-  P <- matrix(c(X, t(y)), nrow = n)
-  Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
+  X <- X + t(matrix(rep(mu,n), d, n))
+  # analytically normalize log-concave density
+  r <- callCalcExactIntegralC(X, y, cvh, rep(TRUE, length(y)), 1e-10)
 
-  X <- X + t(matrix(rep(mu,n), 2, n))
-  r <- callCalcExactIntegralC(X,y,P,Q,1e-10)
-
-  aOptNew <- t(matrix(r$a, d, length(r$a) / d))
-  bOptNew <- r$b
-
-  yEval <- aOptNew %*% t(X[1:min(n,10), ]) + matrix(rep(bOptNew, min(10, n)), length(bOptNew), min(10, n))
+  yEval <- r$a %*% t(X[1:min(n,10), ]) + matrix(rep(r$b, min(10, n)), length(r$b), min(10, n))
   diff <- apply(yEval, 2, max) + r$y[1:min(10, length(y))]
   if (sqrt(sum(diff^2)) > 1e-6) {
     warning('Potential numerical problems when calculating the final set of hyperplanes --> Recommended to run the optimization again')
   }
 
-  return(list("a" = aOptNew, "b" = bOptNew, "aSparse" = aOptSparse, "bSparse" = bOptSparse, "logMLE" = r$y))
+  return(list("a" = r$a, "b" = r$b, "aSparse" = aSparse, "bSparse" = bSparse, "logMLE" = r$y))
 }

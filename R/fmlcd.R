@@ -39,6 +39,41 @@ fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4
   n <- dim(X)[1]
   d <- dim(X)[2]
 
+  # Do some sanity checks on the inputs
+  if (n <= d) {
+    stop("There must be at least d+1 data points.")
+  }
+
+  if (length(w) != n) { stop("There must be exactly one weight for each X_i.") }
+
+  if(sum(w <= 0)) stop("All weights must be strictly positive.")
+
+  if (offset < 0) {
+    offset <- 1e-1
+    warning("Offset values smaller than zero are not allowed, set to 0.1.")
+  }
+
+  if (intEps <= 0) {
+    intEps <- 1e-4
+    warning("intEps must be larger than zero, set to 1e-4.")
+  }
+
+  if (objEps <= 0) {
+    objEps <- 1e-7
+    warning("objEps must be larger than zero, set to 1e-7.")
+  }
+
+  # taken from LogConcDEAD
+  if (is.matrix(X)==FALSE) {
+    if(is.numeric(X)) {
+      X <- matrix(X, ncol=1)
+    }
+    else {
+      stop("X must be a numeric vector or matrix.")
+    }
+  }
+
+
   ## renormalize weights to sum to one
   w <- w/sum(w)
 

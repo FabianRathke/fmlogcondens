@@ -470,7 +470,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	}
 	double timeB = cpuSecond();
 	if (verbose > 0) {
-		printf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,(*TermA)*n,fabs(1-*TermB),timeB-timeA);
+		Rprintf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,(*TermA)*n,fabs(1-*TermB),timeB-timeA);
 	}
 	memcpy(params_,params,*lenP*sizeof(double));
 

@@ -1,2 +1,11 @@
 exportPattern("^[[:alpha:]]+")
 useDynLib(fmlogcondens, .registration = TRUE)
+
+import(
+  MASS,
+  mvtnorm,
+  geometry,
+  mclust
+)
+
+importFrom("stats", "runif", "sd", "var")

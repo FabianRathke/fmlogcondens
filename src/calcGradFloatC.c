@@ -27,7 +27,8 @@ void calcGradFloatC(double* gradA, double* gradB, double* influence, double* Ter
             aGamma[i*dim + k] = gamma*a[i*dim + k];
         }
         bGamma[i] = gamma*b[i];
-    }
+		influence[i] = 0;
+	}
 
 	//omp_set_num_threads(omp_get_num_procs());
 

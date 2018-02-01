@@ -6,12 +6,11 @@
 #include <omp.h>
 #include <float.h>
 #include <math.h>
-#include <immintrin.h>
-#include <headers.h>
-#define ALIGN 32
 
-//extern __m256 exp256_ps(__m256 x);
-//extern __m256 log256_ps(__m256 x);
+#ifdef __AVX__
+#include <headers.h>
+#include <immintrin.h>
+#define ALIGN 32
 
 void inline evalHyperplane(float* aGamma, float* bGamma, int* numElements, int* idxElements, float* ftInner, float* XAligned, int dim, int nH, int N, __m256* sum_ft, __m256* ftMax) {
 	int idxA, i, k;
@@ -212,3 +211,8 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
 
 	free(bGamma); free(aGamma); free(XAligned); free(XWAligned);
 }
+#else
+void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH)  {
+	// empty function if no AVX available
+}
+#endif

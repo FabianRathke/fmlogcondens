@@ -93,7 +93,22 @@ callNewtonBFGSLInitC <- function (X, w, params, ACVH, bCVH) {
   return(r)
 }
 
-
+#' @title Analytically normalizes density to one
+#'
+#' @description \code{callCalcExactIntegralC} is a wrapper to a C function that
+#'   analytically normalizes a log-concave density, uniquely described by X and y,
+#'   where y_i = log(f(X_i)), by adapting the function values y uniformly by some delta.
+#'
+#' @param X Set of data points (one sample per row)
+#' @param y Vector of function evaluations log(f(X_i))
+#' @param filter Vector of with entries TRUE/FALSE indicating
+#'   which data points to discard (indicated by FALSE)
+#' @param eps The maximum integration error allowed
+#' @inheritParams paramFitGammaOne
+#'
+#' @return List containing the normalized parametrers
+#'   \item{a}{Vector of hyperplane slopes}
+#'   \item{b}{Vector of hyperplane offsets}
 
 callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
 
@@ -123,4 +138,8 @@ callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
           b = as.double(matrix(0, dim(T)[1])))
   r$a = t(matrix(r$a, d, length(r$a) / d))
   return(r)
+}
+
+callAVXInfo <- function() {
+  invisible(.C ("printAVXInfo"))
 }

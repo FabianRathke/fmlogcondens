@@ -1,4 +1,4 @@
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) $(SHLIB_OPENMP_CFLAGS)
 #CFLAGS += -O3 -I/usr/share/R/include/R_ext -fopenmp -march=native
 #PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS) -march=native -I../src
-PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS) -mavx -I../src#
+PKG_CFLAGS = $(SHLIB_OPENMP_CFLAGS) -I../src

@@ -4,9 +4,7 @@
 #include <float.h>
 #include <time.h>
 #include <omp.h>
-#include <R.h>
 #include <headers.h>
-//#include <Rinternals.h>
 
 void sumVec(double *A, double *B, double *C, int n) {
 	for (int i=0; i < n; i++) {
@@ -74,10 +72,13 @@ int compare (const void * a, const void * b)
 }
 
 void callOptimization(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, unsigned short int *XToBox, int numBoxes, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH) {
+ 	*TermA = 0; *TermB = 0;
+	memset(gradA,0,nH*(dim+1)*sizeof(double));
+  	memset(gradB,0,nH*(dim+1)*sizeof(double));
 #ifdef __AVX__  
 	calcGradAVXC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,numPointsPerBox,boxEvalPoints,XToBox,numBoxes,a,b,gamma,weight,delta,N,M,dim,nH);
 #else
-    calcGradFloatC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,N,N,M,dim,nH);
+	calcGradFloatC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,N,N,M,dim,nH);
 #endif
 }
 
@@ -86,8 +87,7 @@ void callPreConditioner(int** elementList, int** elementListSize, int* numEntrie
 #ifdef __AVX__
 	preCondGradAVXC(elementList,elementListSize,numEntries,maxElement,idxEntries,X,grid,YIdx,numPointsPerBox,boxEvalPoints,numBoxes,a,aTrans,b,gamma,weight,delta,N,M,dim,nH);
 #else
-	preCondGradFloatC(elementList,elementListSize,numEntries,maxElement,idxEntries,X,grid,YIdx,numPointsPerBox,boxEvalPoints,numBoxes,a,aTrans,b,gamma,weight,delta,N,M,dim,nH,MBox);
-
+	preCondGradFloatC(elementList,elementListSize,numEntries,maxElement,idxEntries,X,grid,YIdx,numPointsPerBox,boxEvalPoints,numBoxes,a,b,gamma,weight,delta,N,M,dim,nH,MBox);
 #endif
 }
 
@@ -114,15 +114,14 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 
 	omp_set_num_threads(omp_get_max_threads());
 	if (verbose > 1) {
-		Rprintf("Using %d threads\n",omp_get_max_threads());
+		printf("Using %d threads\n",omp_get_max_threads());
 	}
 	//omp_set_num_threads(2);
-	//Rprintf("%d, %d\n",omp_get_num_procs(), omp_get_max_threads());
+	//printf("%d, %d\n",omp_get_num_procs(), omp_get_max_threads());
 
 	int i;
 	double timeA = cpuSecond();
 	
-
 	// create the integration grid
     int lenY, numBoxes = 0;
 	int *numPointsPerBox; unsigned short int *YIdx, *XToBox; double *boxEvalPoints; 
@@ -133,9 +132,9 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
     double *grid = NULL;
     setGridDensity(box,dim,0,&NGrid,&MGrid,&grid,&weight);
 
-	//Rprintf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
+	//printf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
 	makeGridC(X_,&YIdx,&XToBox,&numPointsPerBox,&boxEvalPoints,ACVH,bCVH,box,&lenY,&numBoxes,dim,lenCVH,NGrid,MGrid,n);
-	//Rprintf("Obtained grid with %d points and %d boxes\n",lenY,numBoxes);
+	//printf("Obtained grid with %d points and %d boxes\n",lenY,numBoxes);
 
     point list[n];
     for (i=0; i < n; i++) {
@@ -192,6 +191,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 	double initA = *TermA + *TermB;
 
+	printf("TermA %.4f, TermB; %.4f\n",*TermA, *TermB);
+
 	double *params = NULL;
 	if (lenPB > 0) {
 		// paramsB
@@ -210,13 +211,13 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 
 		if (initA < initB) {
 			if (verbose > 1) {
-				Rprintf("Choose log-concave density with gamma = 1 for initialization\n");
+				printf("Choose log-concave density with gamma = 1 for initialization\n");
 			}
 			free(gradAB); free(gradBB); free(TermAB); free(TermBB); free(aB); free(bB); free(influenceB);
 			params = malloc(*lenP*sizeof(double)); memcpy(params,params_,*lenP*sizeof(double)); 
 		} else {
 			if (verbose > 1) {
-				Rprintf("Choose kernel density for initialization\n");
+				printf("Choose kernel density for initialization\n");
 			}
 			free(gradA); free(gradB); free(TermA); free(TermB); free(a); free(b); free(influence);
 			gradA = gradAB; gradB = gradBB; TermA = TermAB; TermB = TermBB; a = aB; b = bB; influence = influenceB;
@@ -227,8 +228,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		params = malloc(*lenP*sizeof(double)); memcpy(params,params_,*lenP*sizeof(double)); 
 	}
 
-	if (verbose > 1) {
-		Rprintf("******* Run optimization on %d grid points for %d hyperplanes ***********\n",lenY,*lenP/(dim+1));
+	if (verbose > 0) {
+		printf("******* Run optimization on %d grid points for %d hyperplanes ***********\n",lenY,*lenP/(dim+1));
 	}
 
 	// two points for a and b: slope and bias of hyperplanes
@@ -339,7 +340,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		if (iter >= 25 && ((double) nHHist[iter-25] - nHHist[iter])/(double) nHHist[iter] < 0.05 && mode == 0 && nH > 500 && gamma >= 100) {
 			mode = 1;
 			if (verbose > 1) {
-				Rprintf("Changed	mode\n");
+				printf("Changed	mode\n");
 			}
 			updateList = updateListInterval;
 			
@@ -451,7 +452,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 			type = 1;
 			switchIter = iter;
 			if (verbose > 1) {
-				Rprintf("Switch to double\n");
+				printf("Switch to double\n");
 			}
 		}
 	
@@ -468,13 +469,13 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
         	activeCol = 0;
 		}
 		double timeB = cpuSecond()-timer;
-		if (verbose > 1 && (iter < 10 || iter % 5 == 0)) {
-			Rprintf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
+		if (verbose > 1 && (iter < 10 || iter % 10 == 0)) {
+			printf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
 		}
 	}
 	double timeB = cpuSecond();
 	if (verbose > 0) {
-		Rprintf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,(*TermA)*n,fabs(1-*TermB),timeB-timeA);
+		printf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,(*TermA)*n,fabs(1-*TermB),timeB-timeA);
 	}
 	memcpy(params_,params,*lenP*sizeof(double));
 

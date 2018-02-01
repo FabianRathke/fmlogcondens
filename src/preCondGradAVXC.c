@@ -9,11 +9,11 @@
 #include <assert.h>
 #include <sys/time.h>
 #include <malloc.h>
+
+#ifdef __AVX__
 #include <headers.h>
 
 #define ALIGN 32
-#define UNROLL 2
-
 
 struct maxS  {
     float val;
@@ -250,7 +250,6 @@ void inline findMaxVal(float* aGamma, float* bGamma, float* ftInner, float* X, i
         }
         _mm256_store_ps(ftInner+8*i,ft);
         cmp =_mm256_cmp_ps(ft,*ftMax,_CMP_GT_OQ);
-//      _mm256_maskstore_epi32(idxMax,_mm256_castps_si256(cmp),_mm256_set1_epi32(i)); AVX2 only
         _mm256_maskstore_ps(idxMax,_mm256_castps_si256(cmp),_mm256_set1_ps(i));
         *ftMax = _mm256_max_ps(ft,*ftMax);
     }
@@ -281,7 +280,6 @@ void inline findMaxVal(float* aGamma, float* bGamma, float* ftInner, float* X, i
             val1 = _mm256_mul_ps(_mm256_mul_ps(_mm256_mul_ps(evalTmp,Delta[k]),cmp),numPoints);
             ft = _mm256_add_ps(ft,val1);
         }
-//      _mm256_store_ps(ftInner+8*i,ft);
         cmp =_mm256_cmp_ps(ft,*ftMax,_CMP_GT_OQ);
         mask = _mm256_movemask_ps(cmp);
         if (mask !=0) {
@@ -331,32 +329,14 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	{   
 		float* ftInner;
 		ftInner = memalign(ALIGN,nH*sizeof(float));
-		/*float* ftInnerUnroll[UNROLL];
-		for (int l=0; l < UNROLL; l++) {
-			ftInnerUnroll[l] = memalign(ALIGN,nH*sizeof(float));
-		}*/
-		int numElementsUnroll[UNROLL];
 		int sizeElementList = elementListIncrement;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
-		int *idxMax = malloc(UNROLL*sizeof(int));
+		int *idxMax = malloc(sizeof(int));
 		int *counterLocal = malloc(sizeof(int));
 		int numElements, numElementsOld;
 		/* calculate gradient for samples */
 		*counterLocal = 0;
-		/*#pragma omp for private(l)
-		for (j=0; j < N-N%UNROLL; j+=UNROLL) {
-			if (sizeElementList < *counterLocal + nH) {
-				sizeElementList *= 2;
-				elementListLocal = realloc(elementListLocal,sizeElementList*sizeof(int));
-			}
-			makeElementListExactUnroll(aGamma, bGamma, ftInnerUnroll, X+j, dim, nH, N, idxMax, elementListLocal, counterLocal, numElementsUnroll);
-			for (l=0; l < UNROLL; l++) {
-				maxElement[j+l] = idxMax[l];
-				numEntries[j+l] = numElementsUnroll[l];
-			}
-		}*/
 		#pragma omp for
-//		for (j=N-N%UNROLL; j < N; j++) {
 		for (j=0; j < N; j++) {		
 			if (sizeElementList < *counterLocal + nH) {
 				sizeElementList *= 2;
@@ -366,7 +346,6 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				} else {
 					error("Realloc failed --> aborting execution");
 				}
-				//elementListLocal = realloc(elementListLocal,sizeElementList*sizeof(int));
 			}
 			numElementsOld = *counterLocal;
 			makeElementListExact(aGamma, bGamma, ftInner, X+j, dim, nH, N, idxMax, elementListLocal, counterLocal);
@@ -412,9 +391,6 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				savedValues += *counterLocal;
 			}
 		}
-/*		for (l=0; l < UNROLL; l++) {
-			free(ftInnerUnroll[l]);
-		}*/
 		free(elementListLocal); free(ftInner); free(idxMax); free(counterLocal);
 	}
     double timeTotal = cpuSecond()-iStart;
@@ -422,19 +398,11 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	double i1, part1, part2, part3, part4, part5;
 	part1 = part2 = part3 = part4 = part5 = 0;
 
-	int complexity = 0;	
 	iStart = cpuSecond();
 	#pragma omp parallel
 	{
 		float *stInner; 
-		//assert(!posix_memalign((void **) &stInner, ALIGN, 8*nH*sizeof(float)));
 		stInner = memalign(ALIGN,8*nH*sizeof(float));
- 		float* stInnerUnroll[UNROLL];
-        for (int l=0; l < UNROLL; l++) {
-            //assert(!posix_memalign((void **) &(stInnerUnroll[l]), ALIGN, nH*sizeof(float)));
-			stInnerUnroll[l] = memalign(ALIGN,8*nH*sizeof(float));
-        }
-        int numElementsUnroll[UNROLL];
 
 		int sizeElementList = elementListIncrement;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
@@ -442,15 +410,13 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
         int *idxElementsBox = malloc(8*nH*sizeof(int));
         int numElements, numElementsOld, numElementsBox[8], totalElements = 0;
 		float *aLocal, *bLocal;
-		//assert(!posix_memalign((void **) &aLocal, ALIGN, dim*nH*sizeof(float)));
-        //assert(!posix_memalign((void **) &bLocal, ALIGN, nH*sizeof(float)));
 		aLocal = memalign(ALIGN,dim*nH*sizeof(float));
 		bLocal = memalign(ALIGN,nH*sizeof(float));
 		float *Ytmp = calloc(8*dim,sizeof(float));
 		int *idxEntriesLocal = malloc(M*sizeof(int));
 		int *maxElementLocal = malloc(M*sizeof(int));
 		int *numEntriesLocal = malloc(M*sizeof(int));
-	    int *idxMax = malloc(UNROLL*sizeof(int));
+	    int *idxMax = malloc(sizeof(int));
         int *counterLocal = malloc(sizeof(int));
 		int l,n,m,p,q;
 		__m256 stMax_;
@@ -472,14 +438,10 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
             for (m = 0; m < fmin(n+8,numBoxes)-n; m++) {
                 j = n+m;
 				//printf("%d,%d,%d (%d): %d nH, %d elements\n",n,m,j,omp_get_thread_num(),numElementsBox[m],numPointsPerBox[j+1] - numPointsPerBox[j]);
-				complexity += numElementsBox[m]*(numPointsPerBox[j+1] - numPointsPerBox[j]);
                 i1 = cpuSecond();
                 // save hyperplanes in one compact vector
                 for (i=0; i < numElementsBox[m]; i++) {
                     bLocal[i] = bGamma[idxElementsBox[i+m*nH]];
-                    /*for (k=0; k < dim; k++) {
-                        aLocal[i*dim + k] = aGamma[idxElementsBox[i+m*nH]*dim + k];
-                    }*/
                 }
 				for (k=0; k < dim; k++) {
                     for (i=0; i < numElementsBox[m]; i++) {
@@ -490,26 +452,7 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	
 				i1 = cpuSecond();
 				int numPoints = numPointsPerBox[j+1]-numPointsPerBox[j];
-			    /*for (p=0; p < numPoints-numPoints%UNROLL; p+=UNROLL) {
-					l = p + numPointsPerBox[j];
-					for (k=0; k < dim; k++) {
-						for (q=0; q < UNROLL; q++) {
-							Ytmp[q + k*UNROLL] = gridLocal[k]+delta[k]*YIdx[(l+q)*dim + k];
-						}
-					}	
-					if (sizeElementList < *counterLocal + numElementsBox[m]*UNROLL) {
-						sizeElementList *= 2;
-						elementListLocal = realloc(elementListLocal,sizeElementList*sizeof(int));
-					}
-					makeElementListExactUnroll(aLocal, bLocal, stInnerUnroll, Ytmp, dim, numElementsBox[m], UNROLL, idxMax, elementListLocal, counterLocal, numElementsUnroll);
-					for (q=0; q < UNROLL; q++) {
-						maxElementLocal[totalElements] = idxMax[q];
-						numEntriesLocal[totalElements] = numElementsUnroll[q];
-						idxEntriesLocal[totalElements++] = l+q;
-					}
-				}*/
-
-				//for (p = numPoints-numPoints%UNROLL; p < numPoints; p++) {
+				
 				for (p=0; p < numPoints; p++) {
 					l = p + numPointsPerBox[j];
 					for (k=0; k < dim; k++) {
@@ -551,7 +494,6 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				} else { 
 					error("Realloc failed --> aborting execution");
 				}
-            	//*elementList = realloc(*elementList,counter*sizeof(int));
 				**elementListSize = counter;
             }
         }
@@ -570,101 +512,14 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				savedValues2 += totalElements;
 			}
         }
-
   		free(Ytmp); free(stInner); free(idxElements); free(idxElementsBox); free(elementListLocal); free(idxEntriesLocal); free(maxElementLocal); free(numEntriesLocal); free(idxMax); free(counterLocal); free(aLocal); free(bLocal);
-		for (l=0; l < UNROLL; l++) {
-//			free(stInnerUnroll[l]);
-		}
 
 	} /* end of pragma parallel */
 	**elementListSize = counter;
 	free(aGamma); free(bGamma); free(aTransGamma); 
 }
-
-
-/*// we want the exact max to limit the amount of added hyperplanes --> requires two runs for each grid point Y
-void inline makeElementListExactUnroll(float* aGamma, float* bGamma, float** ftStore, float* X, int dim, int nH, int N, int* idxMax, int* elementListLocal, int* counterLocal, int* numElements) {
-    int i, k,l, mask;
-    __m256 ft[UNROLL], cmp, a, val1, idx, max[UNROLL];
-	__m256i idxSelect;	
-	float ftMax;
-	struct maxS p;
-	idx = _mm256_set_ps(7,6,5,4,3,2,1,0);
-	for (l=0; l < UNROLL; l++) {
-		max[l] = _mm256_set1_ps(-FLT_MAX);
-	}
-    ftMax = -FLT_MAX;
-
-	// find max
-    for (i=0; i < nH-(nH%8); i+=8) {
-		for (l=0; l < UNROLL; l++) {
-			ft[l] = _mm256_load_ps(bGamma + i);
-		}
-        // ftTmp = bGamma[i] + aGamma[idxA]*X[idxB];
-        for (k=0; k < dim; k++) {
-			a = _mm256_loadu_ps(aGamma + i + k*nH);
-			for (l=0; l < UNROLL; l++) {
-#ifdef __AVX2__
-				ft[l] = _mm256_fmadd_ps(_mm256_set1_ps(*(X + l +  N*k)),a,ft[l]); // combined multiply+add
 #else
-            	ft[l] = _mm256_add_ps(ft[l],_mm256_mul_ps(_mm256_set1_ps(*(X+l+N*k)),a));
-#endif			
-			}
-        }
-		// store ft
-		for (l=0; l < UNROLL; l++) {
-			_mm256_store_ps(ftStore[l]+i,ft[l]);
-			max[l] = _mm256_max_ps(ft[l],max[l]);
-		}
-	}
-	// horizontal max
-	for (l=0; l < UNROLL; l++) {
-		numElements[l] = 0;
-		p = avx_max_struct(max[l],max[l]);
-		// does not reflect the true Index --> dummy value --> change of index should be required 
-		*idxMax = -1;
-		// broadcast max back to avx register
-		ftMax = p.val;
-		val1 = _mm256_set1_ps(ftMax-250);
-		for (i=0; i < nH-(nH%8); i+=8) {
-			// ftTmp > ftInnerMax
-			ft[0] = _mm256_load_ps(ftStore[l]+i);
-			cmp =_mm256_cmp_ps(ft[0],val1,_CMP_GT_OQ);
-			mask = _mm256_movemask_ps(cmp);
-			
-			// store in elementList
-			if (mask != 0) {
-#ifdef __AVX2__	
-				idxSelect = _mm256_cvtps_epi32(compress256(_mm256_add_ps(idx,_mm256_set1_ps(i)), mask));
-#else
-				idxSelect = compress256_AVX(i, mask);
-#endif
-				_mm256_storeu_si256((__m256i*) (elementListLocal+(*counterLocal)),idxSelect);
-				int count = _mm_popcnt_u32(mask);
-				*counterLocal += count;
-				numElements[l]+= count;
-			}
-		}
-		float ftInner;
-		// for the remaining hyperplanes do the scalar way
-		for (i = nH-(nH%8); i < nH; i++) {
-			ftInner = bGamma[i] + aGamma[i]**X;
-			for (k=1; k < dim; k++) {
-				ftInner += aGamma[i+k*nH]**(X + (k*N));
-			}
-
-			if (ftInner > ftMax-250) {
-				// find maximum element 
-				if (ftInner > ftMax) {
-					ftMax = ftInner;
-					*idxMax = i;
-				}
-
-				elementListLocal[(*counterLocal)++] = i;
-				numElements[l]++;
-			}
-		}
-	}
+void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, int* maxElement, int* idxEntries, float* X, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, int numBoxes, double* a, double* aTrans, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH) {
+	// empty function if AVX is not used
 }
-*/
-
+#endif

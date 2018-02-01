@@ -5,14 +5,15 @@
 #include <omp.h>
 #include <float.h>
 #include <limits.h>
-//#include <immintrin.h>
-#include "avx_mathfun.h"
 #include <sys/time.h>
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <R.h>
 
+
+#ifdef __AVX__
+#include "avx_mathfun.h"
 #define ALIGN 32
 
 #define _mm256_full_hadd_ps(v0, v1) \
@@ -290,11 +291,6 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 		influence[i] = 0;
 	}
 
-	for (i=0; i < nH*(dim+1); i++) {
-		gradA[i] = 0;
-		gradB[i] = 0;
-	}
-
 	// Calculate gradient for grid points
 	TermBLocal = 0; *TermB = 0;
 	TermALocal = 0;	*TermA = 0;
@@ -534,3 +530,9 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 
 	free(grad_st_tmp); free(gridLocal); free(aGamma); free(bGamma);
 }
+#else
+
+void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, unsigned short int *XToBox, int numBoxes, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH){
+	// empty function --> AVX not used
+}
+#endif

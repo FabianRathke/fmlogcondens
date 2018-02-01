@@ -1,3 +1,24 @@
+#' @title Estimates a Log-Concave Mixture Density
+#'
+#' @description \code{fmlcdEM} Utilizes the EM approach to obtain a mixture
+#'   of log-concave densities. Utilizes Gaussian hierarchical clustering to
+#'   initilize the posterior probabilities of class affiliation (as proposed
+#'   by the package LogConcDEAD by Cule et al.).
+#'
+#' @param X Matrix of data points (one sample per row)
+#' @param K Number of latent variables (default: 2)
+#' @param posterior Matrix with posterior probabilities for class affiliation;
+#'   Initialized if not provided using a Gaussian hierarchical clustering.
+#' @param verbose Int determining the verboseness of the code; 0 = no output
+#'   to 3. (default: 0)
+#' @param maxIter Maximal number of EM iterations. (default: 50)
+#'
+#' @return Parametrization of the mixture density
+#'   \item{params}{List of length K, where each entry contains the hyperplane for one
+#'   density}
+#'   \item{densEst}{Matrix where each row contains the marginal distribution p(x)}
+#'   \item{tau}{Marginal distribution over the latent variable p(z)}
+
 fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
   n <- nrow(X); d <- ncol(X)
 
@@ -73,6 +94,6 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
     tau <- apply(posterior, 2, sum) / sum(posterior)
   }
 
-  r <- list(params, densEst)
+  r <- list("params" = params, "densEst" = densEst, "tau" = tau)
   return(r)
 }

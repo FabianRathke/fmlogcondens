@@ -3,7 +3,6 @@
 #include <string.h>
 #include <float.h>
 #include <omp.h> 
-#include <R.h>
 #include <headers.h>
 
 void sumGrad(double* grad, double* gradA, double* gradB, int n) {
@@ -28,8 +27,13 @@ void calcGradFloatAVXCaller(float *X, float* XW, float *grid, double* a, double*
 	*TermA = 0; *TermB = 0;
 
 	// perform AVX for most entries except the one after the last devisor of 8
+#ifdef __AVX__
     calcGradFullAVXC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,n,M,dim,nH);
 	calcGradFloatC(gradA,gradB,influence,TermA,TermB,X + n - modn,XW + n - modn,grid,YIdx + (M - modM)*dim,a,b,gamma,weight,delta,n,modn,modM,dim,nH);
+#else
+	calcGradFloatC(gradA,gradB,influence,TermA,TermB,X,XW,grid,YIdx,a,b,gamma,weight,delta,n,n,M,dim,nH);
+#endif
+
 }
 
 /* newtonBFGLSInitC

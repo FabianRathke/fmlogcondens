@@ -55,7 +55,9 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 	}
 	// q = grad
 	memcpy(q,grad,nH*sizeof(double));
+#ifdef __AVX__
 	__m256d alpha,q_;
+#endif
     // first for-loop
 	for (l=0; l < numIter; l++) {
 		curCol = iterVec[l];
@@ -66,6 +68,7 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 			tmp += s_k[curCol*nH + j]*q[j];
 		}
 		alphaBFGS[curCol] = tmp*syInv[curCol];
+#ifdef __AVX__
 		alpha = _mm256_set1_pd(alphaBFGS[curCol]);
 		#pragma omp parallel for private(q_)
 		for (j=0; j < nH-nH%4; j+=4) {
@@ -74,17 +77,23 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 			_mm256_storeu_pd(q+j,q_);
 		}
 		for (j=nH-nH%4; j < nH; j+=4) {
-	//	for (j=0; j < nH; j++) {
 			q[j] -= alphaBFGS[curCol]*y_k[curCol*nH+j];
 		}
+#else
+		#pragma omp parallel for
+		for (j=0; j < nH; j++) {
+			q[j] -= alphaBFGS[curCol]*y_k[curCol*nH+j];
+		}
+#endif
 	}
-
 
 	for (j=0; j < nH; j++) {
 		q[j] = H0*q[j]; // is "r" in the matlab code and the book
 	}
 	// second for-loop
+#ifdef __AVX__
 	__m256d tmp_;
+#endif
 	for (l=0; l < numIter; l++) {
 		curCol = iterVec[numIter-1-l];
 		betaBFGS = 0;
@@ -94,6 +103,7 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 		}
 		betaBFGS *= syInv[curCol];
 		tmp = (alphaBFGS[curCol]-betaBFGS);
+#ifdef __AVX__
 		tmp_ = _mm256_set1_pd(tmp);
 		#pragma omp parallel for private(q_)
 		for (j=0; j < nH-nH%4; j+=4) {
@@ -104,6 +114,12 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 		for (j=nH-nH%4; j < nH; j++) {
 			q[j] += s_k[curCol*nH + j]*tmp;
 		}
+#else
+		#pragma omp parallel for
+		for (j=0; j < nH; j++) {
+			q[j] += s_k[curCol*nH + j]*tmp;
+		}
+#endif
 	}
 
 	for (j=0; j < nH; j++) {

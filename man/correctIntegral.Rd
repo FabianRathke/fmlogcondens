@@ -20,9 +20,9 @@ describing one face of conv(X)}
 }
 \value{
 Normalized hyperplane parameters (for the uncentered \code{X <- X +
-  mu}) \item{aOpt, bOpt}{Hyperplane parameters of the normalized density.}
+  mu}) \item{a, b}{Hyperplane parameters of the normalized density.}
   \item{y}{Vector with values y_i = log(f(X_)) of the normalized density.}
-  \item{aOptSparse, bOptSparse}{Input hyperplane parameters.}
+  \item{aSparse, bSparse}{Input hyperplane parameters.}
 }
 \description{
 \code{correctIntegral} normalizes a log-concave density

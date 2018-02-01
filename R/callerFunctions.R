@@ -140,6 +140,14 @@ callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
   return(r)
 }
 
+
+#' @title Checks if AVX is active
+#'
+#' @description \code{callAVXInfo} is a wrapper to a C function, which prints information
+#'   about whether AVX extensions are currently activated. This leads to much fuch faster
+#'   run times (by a factor of 4 to 8 roughly). More informations about how AVX can be enabled
+#'   can be found in the vignette about installation.
+
 callAVXInfo <- function() {
   invisible(.C ("printAVXInfo"))
 }

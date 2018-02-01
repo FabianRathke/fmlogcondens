@@ -16,6 +16,8 @@ describing one face of conv(X)}
 
 \item{filter}{Vector of with entries TRUE/FALSE indicating
 which data points to discard (indicated by FALSE)}
+
+\item{eps}{The maximum integration error allowed}
 }
 \value{
 List containing the normalized parametrers

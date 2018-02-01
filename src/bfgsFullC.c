@@ -113,11 +113,11 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	double intEps = *intEps_, lambdaSqEps = *lambdaSqEps_, cutoff = *cutoff_, gamma = *gamma_;
 
 	omp_set_num_threads(omp_get_max_threads());
-	if (verbose > 1) {
-		printf("Using %d threads\n",omp_get_max_threads());
+	if (verbose > 2) {
+		Rprintf("Using %d threads\n",omp_get_max_threads());
 	}
 	//omp_set_num_threads(2);
-	//printf("%d, %d\n",omp_get_num_procs(), omp_get_max_threads());
+	//Rprintf("%d, %d\n",omp_get_num_procs(), omp_get_max_threads());
 
 	int i;
 	double timeA = cpuSecond();
@@ -132,13 +132,12 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
     double *grid = NULL;
     setGridDensity(box,dim,0,&NGrid,&MGrid,&grid,&weight);
 
-	//printf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
+	//Rprintf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
 	makeGridC(X_,&YIdx,&XToBox,&numPointsPerBox,&boxEvalPoints,ACVH,bCVH,box,&lenY,&numBoxes,dim,lenCVH,NGrid,MGrid,n);
-	//printf("Obtained grid with %d points and %d boxes\n",lenY,numBoxes);
+	//Rprintf("Obtained grid with %d points and %d boxes\n",lenY,numBoxes);
 
     point list[n];
     for (i=0; i < n; i++) {
-        //printf("%d: %d (%.4f, %.4f)\n",i,XToBox[i], X_[i], X_[i + n]);
         list[i].id = i;
         list[i].XToBox = XToBox[i];
     }
@@ -153,7 +152,6 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
         }
         XW[i] = XW_[list[i].id];
         XToBox[i] = list[i].XToBox;
-        //printf("%d: %d (%.4f, %.4f)\n",list[i].id,list[i].XToBox,X[i],X[i+n]);
         //B[list[i].id] = i;
     }
 
@@ -191,8 +189,6 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 	double initA = *TermA + *TermB;
 
-	printf("TermA %.4f, TermB; %.4f\n",*TermA, *TermB);
-
 	double *params = NULL;
 	if (lenPB > 0) {
 		// paramsB
@@ -211,13 +207,13 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 
 		if (initA < initB) {
 			if (verbose > 1) {
-				printf("Choose log-concave density with gamma = 1 for initialization\n");
+				Rprintf("Choose log-concave density with gamma = 1 for initialization\n");
 			}
 			free(gradAB); free(gradBB); free(TermAB); free(TermBB); free(aB); free(bB); free(influenceB);
 			params = malloc(*lenP*sizeof(double)); memcpy(params,params_,*lenP*sizeof(double)); 
 		} else {
 			if (verbose > 1) {
-				printf("Choose kernel density for initialization\n");
+				Rprintf("Choose kernel density for initialization\n");
 			}
 			free(gradA); free(gradB); free(TermA); free(TermB); free(a); free(b); free(influence);
 			gradA = gradAB; gradB = gradBB; TermA = TermAB; TermB = TermBB; a = aB; b = bB; influence = influenceB;
@@ -229,7 +225,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	}
 
 	if (verbose > 0) {
-		printf("******* Run optimization on %d grid points for %d hyperplanes ***********\n",lenY,*lenP/(dim+1));
+		Rprintf("******* Run optimization on %d grid points for %d hyperplanes ***********\n",lenY,*lenP/(dim+1));
 	}
 
 	// two points for a and b: slope and bias of hyperplanes
@@ -339,8 +335,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		// switch to sparse approximative mode
 		if (iter >= 25 && ((double) nHHist[iter-25] - nHHist[iter])/(double) nHHist[iter] < 0.05 && mode == 0 && nH > 500 && gamma >= 100) {
 			mode = 1;
-			if (verbose > 1) {
-				printf("Changed	mode\n");
+			if (verbose > 2) {
+				Rprintf("Switch to fast mode\n");
 			}
 			updateList = updateListInterval;
 			
@@ -356,7 +352,6 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		}
 
 		lambdaSq = calcLambdaSq(grad,newtonStep,dim,nH);
-		//Rprintf("lambdaSq: %.4f\n",lambdaSq);
 		if (lambdaSq < 0 || lambdaSq > 1e5) {
 			for (i=0; i < nH*(dim+1); i++) {
 				newtonStep[i] = -grad[i];
@@ -451,8 +446,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		if (lastStep == 0 && type == 0) {
 			type = 1;
 			switchIter = iter;
-			if (verbose > 1) {
-				printf("Switch to double\n");
+			if (verbose > 2) {
+				Rprintf("Switch to double\n");
 			}
 		}
 	
@@ -470,7 +465,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		}
 		double timeB = cpuSecond()-timer;
 		if (verbose > 1 && (iter < 10 || iter % 10 == 0)) {
-			printf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
+			Rprintf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
 		}
 	}
 	double timeB = cpuSecond();

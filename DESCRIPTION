@@ -7,13 +7,15 @@ Maintainer: Fabian Rathke <frathke@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: GPL (>= 2)
-Depends: R (>= 3.2.0)
-Encoding: UTF-8
-LazyData: true
 Depends:
 	geometry,
 	MASS,
 	mclust,
 	mvtnorm
+Encoding: UTF-8
+LazyData: true
 Suggests:
-    LogConcDEAD
+    LogConcDEAD,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

@@ -23,6 +23,7 @@
 #' @param offset Smaller values correspond to slower hyperplane reduction.
 #'   Offset should be a value smaller than 1. Modification of this value is not
 #'   recommended. (default: 1e-1)
+#' @param maxIter Number of iterations in the main optimization (default: 1e4)
 #'
 #' @return Parametrization of f(x) in terms of hyperplanes and function
 #'   evaluations y = log(f(x)) \item{aOpt, bOpt}{Analytically normalized
@@ -33,7 +34,7 @@
 #'
 #' @example R/Examples/correctIntegral
 
-fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4, objEps = 1e-7, offset = 1e-1) {
+fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4, objEps = 1e-7, offset = 1e-1, maxIter = 1e4) {
 
   gamma = 1000
   n <- dim(X)[1]
@@ -79,7 +80,7 @@ fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4
 
   ## substract the mean from X
   mu = apply(X,2,mean)
-  X = X - mu
+  X = X - t(matrix(rep(mu,n), d, n))
 
   ## obtain faces of convex hull of X
   cvhParams <- calcCvxHullFaces(X)

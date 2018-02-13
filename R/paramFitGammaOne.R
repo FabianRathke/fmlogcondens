@@ -30,9 +30,9 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
   m <- 10 * d # number of initial hyperplanes
 
   minLogLike <- 1e5
-  numInits <- 1
+  numRuns <- 1
   # choose best model from a set of initializations
-  for (i in 1:numInits) {
+  for (i in 1:numRuns) {
     a <- runif(m * d, 0, 0.1)
     b <- runif(m)
     params <- c(a, b)
@@ -63,7 +63,7 @@ paramFitGammaOne <- function(X, w, ACVH, bCVH, cvh) {
   # detect if all hyerplanes where intitialized to the same parameters;
   # happens for small sample sizes --> very slow convergence in the final optimization
   idxCheck <- sample(length(bOpt), min(100, length(bOpt)))
-  if (mean(apply(aOpt[idxCheck, ], 2, var)) < 1e-4 || length(bOpt) == 1) {
+  if (length(bOpt) > 1 && mean(apply(aOpt[idxCheck, ], 2, var)) < 1e-4) {
     print('#### Bad initialization due to small sample size, switch to kernel kensity based initialization ####');
     params <- paramFitKernelDensity(X, w, cvh)
   } else {

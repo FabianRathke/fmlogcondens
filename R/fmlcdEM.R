@@ -85,7 +85,8 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
     for (j in 1:K) {
       sampleWeights <- posterior[, j] / sum(posterior[, j])
       sampleWeights[sampleWeights < 1e-8 / n] <- 0
-      r <- callNewtonBFGSLC(X, sampleWeights, params[[j]], matrix(0, 0, 0), cvhParams, gamma, verbose - 1, intEps, objEps, offset)
+      r <- callNewtonBFGSLC(X, sampleWeights, params[[j]], matrix(0, 0, 0),
+                    cvhParams, gamma, verbose - 1, intEps, objEps, offset)
 
       result <- correctIntegral(X, rep(0,2), r$a, r$b, cvhParams$cvh);
       params[[j]] <- c(result$a, result$b)

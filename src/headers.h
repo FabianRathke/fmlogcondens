@@ -22,8 +22,6 @@ extern void unzipParams(double *params, double *a, double *b, int dim, int nH, i
 extern void unzipParamsFloat(double *params, float *a, float *b, int dim, int nH, int transpose);
 extern double calcLambdaSq(double* grad, double* newtonStep, int dim, int nH);
 extern void copyVector(double* dest, double* source, int n, int switchSign);
-//void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *dim_, int *lenP_, int *n_, double* ACVH, double* bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double* logLike);
-//void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_, double *gamma_);
 extern double cpuSecond();
 
 

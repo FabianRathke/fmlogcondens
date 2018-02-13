@@ -364,7 +364,7 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 					}
 			
 					// iterate over all samples in that box 
-					while (XToBox[XCounter+7]==j) {
+					while (N > XCounter+7 && XToBox[XCounter+7]==j) {
 						countA++;
 						evalHyperplaneY(aLocal, bLocal, &numElements, idxElements, stInner, X+XCounter, dim, numElementsBox[m], N, &sum_st_, &stMax_,idxElementsBox+m*nH);
 						xw = _mm256_loadu_ps(XW + XCounter);
@@ -486,6 +486,7 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 		XCounterGlobal = 0;
 	}
 	int XCounterGlobalStart = XCounterGlobal;
+	
 	// calculate gradient for samples X 
 	#pragma omp parallel
     {
@@ -518,7 +519,7 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
         for (j=XCounterGlobal; j < N; j++) {
 			evalHyperplaneScalar(aGamma, bGamma, ftInner, X, XW, grad_ft_private, &TermALocal, idxElements, j, nH, nH, idxElementsBox, dim, N, factor);
 		}
-    	#pragma omp critical
+		#pragma omp critical
         {
 			for (i=0; i < nH*(dim+1); i++) {
                 gradA[i] += (double) grad_ft_private[i];
@@ -527,7 +528,6 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 		free(ftInner); free(grad_ft_private); free(idxElements);
 	}
 	*TermA = (double) TermALocal;
-
 	free(grad_st_tmp); free(gridLocal); free(aGamma); free(bGamma);
 }
 #else

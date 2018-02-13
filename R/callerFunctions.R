@@ -21,12 +21,13 @@
 #' @param offset Threshold that governs how fast inactive hyperplanes are dropped;
 #'   smaller values correspond to a slower rate of hyperplane deletion
 #'   (default: 1e-1)
+#' @param maxIter Maximual number of iterations of Newton optimization (default: 1e4)
 #'
 #' @return List of n hyperplanes that describe the upper convex hull of log(f(x))
 #'   \item{a}{Slopes of hyerplanes (n x d matrix)}
 #'   \item{b}{Offsets of hyperplanes}
 
-callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma=1000, verbose=0, intEps = 1e-3, objEps = 1e-7, offset = 1e-1) {
+callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma=1000, verbose=0, intEps = 1e-3, objEps = 1e-7, offset = 1e-1, maxIter = 1e4) {
   n <- dim(X)[1]
   d <- dim(X)[2]
 
@@ -47,7 +48,8 @@ callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma=1000,
               as.double(objEps),
               as.double(offset),
               as.integer(verbose),
-              as.double(gamma))
+              as.double(gamma),
+              as.integer(maxIter))
   # res$lenP denotes the number of active parameters in res$params
   optParams <- r$params[1:r$lenP]
 
@@ -124,6 +126,11 @@ callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
 
   T <- geometry::convhulln(rbind(P, Q))
   T <- T[!(apply(T, 1, max) > n), ]
+
+  # if there is only one simplex
+  if (class(T) != "matrix") {
+    T <- t(as.matrix(T))
+  }
 
   r <- .C(  "calcExactIntegralC",
           as.double(t(X)),

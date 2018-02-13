@@ -9,7 +9,7 @@
 /* .C calls */
 extern void calcExactIntegralC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void calcKernelDens(void *, void *, void *, void *, void *, void *);
-extern void newtonBFGSLC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void newtonBFGSLC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void newtonBFGSLInitC(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void printAVXInfo();
 extern void recalcParamsC(void *, void *, void *, void *, void *, void *, void *);
@@ -17,7 +17,7 @@ extern void recalcParamsC(void *, void *, void *, void *, void *, void *, void *
 static const R_CMethodDef CEntries[] = {
     {"calcExactIntegralC", (DL_FUNC) &calcExactIntegralC, 10},
     {"calcKernelDens",     (DL_FUNC) &calcKernelDens,      6},
-    {"newtonBFGSLC",       (DL_FUNC) &newtonBFGSLC,       17},
+    {"newtonBFGSLC",       (DL_FUNC) &newtonBFGSLC,       18},
     {"newtonBFGSLInitC",   (DL_FUNC) &newtonBFGSLInitC,   13},
     {"printAVXInfo",       (DL_FUNC) &printAVXInfo,        0},
     {"recalcParamsC",      (DL_FUNC) &recalcParamsC,       7},

@@ -70,9 +70,10 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 	for (i=0; i < dim; i++) {
 		delta[i] = grid[NGrid*MGrid*i+1] - grid[NGrid*MGrid*i];
 	}
-	//printf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
+
+	Rprintf("Obtain grid for N = %d and M = %d\n",NGrid,MGrid);
 	makeGridC(X,&YIdx,&XToBox,&numPointsPerBox,&boxEvalPoints,ACVH,bCVH,box,&lenY,&numBoxes,dim,lenCVH,NGrid,MGrid,n);
-	//printf("Obtained grid with %d points\n",lenY);
+	Rprintf("Obtained grid with %d points\n",lenY);
 	
 	// only the first entry in each dimension is required
 	float *gridFloat = malloc(dim*sizeof(float));
@@ -151,7 +152,7 @@ void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *
 		}
 		lastStep = funcVal - funcValStep;
 
-		//Rprintf("%d: %.5f (%.4f, %.5f) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e)\n",iter,funcValStep,-*TermA*n,*TermB,lambdaSq,step,lastStep);
+		Rprintf("%d: %.5f (%.4f, %.5f) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e)\n",iter,funcValStep,-*TermA*n,*TermB,lambdaSq,step,lastStep);
 		for (i=0; i < lenP; i++) { params[i] = paramsNew[i]; }
 		
 		if (fabs(1-*TermB) < intEps && lastStep < lambdaSqEps && iter > 10) {

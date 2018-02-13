@@ -1,0 +1,40 @@
+% This file was created with JabRef 2.10.
+% Encoding: ISO8859-1
+
+
+@Article{cule2010,
+  Title                    = {{M}aximum likelihood estimation of a multi-dimensional log-concave density},
+  Author                   = {Cule, M. and Samworth, R. and Stewart, M.},
+  Journal                  = {J. R. Stat. Soc. Series B Stat. Methodol.},
+  Year                     = {2010},
+  Number                   = {5},
+  Pages                    = {545--607},
+  Volume                   = {72},
+
+  Publisher                = {Wiley Online Library},
+  Timestamp                = {2018.02.12}
+}
+
+@Article{duembgen2007,
+  Title                    = {{Active Set and EM Algorithms for Log-Concave Densities Based on Complete and Censored Data}},
+  Author                   = {D{\"u}mbgen, L. and H{\"u}sler, A. and Rufibach, K.},
+  Journal                  = {CoRR},
+  Year                     = {2007},
+  Volume                   = {abs/0707.4643},
+
+  Date-modified            = {2017-11-30 23:33:03 +0000},
+  Timestamp                = {2018.02.12}
+}
+
+@Article{rathke2015b,
+  Title                    = {A Computational Approach to Log-Concave Density Estimation},
+  Author                   = {Rathke, Fabian and Schn\"{o}rr, Christoph},
+  Journal                  = {An. St. Univ. Ovidius Constanta},
+  Year                     = {2015},
+  Number                   = {3},
+  Pages                    = {151-166},
+  Volume                   = {23},
+
+  Timestamp                = {2015.10.14}
+}
+

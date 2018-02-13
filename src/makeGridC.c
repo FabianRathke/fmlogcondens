@@ -10,7 +10,7 @@ void getMN(int dim, int sparse, int* N, int* M) {
 		if (dim==1) {
 			*N = 10; *M = 5;
 		} else if (dim==2) {
-			*N = 12; *M = 4;
+			*N = 10; *M = 5;
 		} else if (dim==3) {
 			*N = 6; *M = 4;
 		} else if (dim==4) {
@@ -292,6 +292,9 @@ void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox
                 }
                 if (funcEvalLocal > 0) {
                     outsideCVH = 1;
+					/*if (l==0 && j == 0) {
+						Rprintf("Failed for %d with %.4e\n",i,funcEvalLocal);
+					}*/
                     break; /* as soon as one violating hyperplane is found, we can stop the search and continue with the next grid point */
                 }
             }
@@ -310,6 +313,7 @@ void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox
                 }
                 /* save subGridIdx (1-D index from 1 to M^d) */
                 numPointsAdded++;
+				//Rprintf("%d: %d, %d added\n",numPointsAdded, l, j);
 		   	}
 		}
 		/* find box max min of outer box boundaries */

@@ -107,13 +107,13 @@ void callPreConditioner(int** elementList, int** elementListSize, int* numEntrie
  * 			double lambdaSqEps	minimal progress of the optimization in terms of objective function value
  * 			double cutoff		threshold for removing inactive hyperplanes.
  * */
-void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_, double *gamma_) {
+void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_, double *gamma_, int *maxIter_) {
 
-	int lenPB = *lenPB_, dim = *dim_, n = *n_, lenCVH = *lenCVH_, verbose = *verbose_;
+	int lenPB = *lenPB_, dim = *dim_, n = *n_, lenCVH = *lenCVH_, verbose = *verbose_, maxIter = *maxIter_;
 	double intEps = *intEps_, lambdaSqEps = *lambdaSqEps_, cutoff = *cutoff_, gamma = *gamma_;
 
-	omp_set_num_threads(omp_get_max_threads());
-	if (verbose > 2) {
+	//omp_set_num_threads(omp_get_max_threads());
+	if (verbose > 1) {
 		Rprintf("Using %d threads\n",omp_get_max_threads());
 	}
 	//omp_set_num_threads(2);
@@ -151,7 +151,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
             X[i+k*n] = X_[list[i].id + k*n];
         }
         XW[i] = XW_[list[i].id];
-        XToBox[i] = list[i].XToBox;
+    	XToBox[i] = list[i].XToBox;
         //B[list[i].id] = i;
     }
 
@@ -188,7 +188,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	unzipParams(params_,a,b,dim,nH,1);
 	callOptimization(gradA,gradB,influence,TermA,TermB,XF,XWF,gridFloat,YIdx,numPointsPerBox,boxEvalPointsFloat,XToBox,numBoxes,a,b,gamma,weight,delta,n,lenY,dim,nH);
 	double initA = *TermA + *TermB;
-
+	
 	double *params = NULL;
 	if (lenPB > 0) {
 		// paramsB
@@ -253,8 +253,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	int type = 0; // 0 == 'float', 1 == 'double'
 	int mode = 0; // 0 == 'normal', 1 == 'fast' - the fast mode keeps a list of active hyperplanes for each sample and grid points which gets updated every updateListInterval interations
 	int updateList = 0,  updateListInterval = 5;
-	int switchIter = -40; // iteration in which the switch from float to double occured
-	int maxIter = 1e4;
+	int switchIter = -50; // iteration in which the switch from float to double occured
 	int *nHHist = malloc(maxIter*sizeof(int)), *activePlanes = NULL, *inactivePlanes = NULL;
 	int *elementListSize = NULL, *elementList = NULL, *numEntries = NULL, *maxElement=NULL, *idxEntries=NULL, *numEntriesCumSum = NULL;
 	// start the main iteration
@@ -450,8 +449,8 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 				Rprintf("Switch to double\n");
 			}
 		}
-	
-		if (fabs(1-*TermB) < intEps && lastStep < lambdaSqEps && iter > 10 && iter - switchIter > 50) {
+
+		if (fabs(1-*TermB) < intEps && lastStep < lambdaSqEps && iter - switchIter > 50) {
 			break;
 		}
 	

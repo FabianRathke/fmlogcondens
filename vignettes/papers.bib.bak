@@ -26,6 +26,15 @@
   Timestamp                = {2018.02.12}
 }
 
+@Book{nocedal2006,
+  Title                    = {Numerical optimization},
+  Author                   = {Nocedal, Jorge and Wright, Stephen},
+  Publisher                = {Springer Science \& Business Media},
+  Year                     = {2006},
+
+  Timestamp                = {2018.02.13}
+}
+
 @Article{rathke2015b,
   Title                    = {A Computational Approach to Log-Concave Density Estimation},
   Author                   = {Rathke, Fabian and Schn\"{o}rr, Christoph},
@@ -36,5 +45,19 @@
   Volume                   = {23},
 
   Timestamp                = {2015.10.14}
+}
+
+@Article{walther2002,
+  Title                    = {Detecting the presence of mixing with multiscale maximum likelihood},
+  Author                   = {Walther, Guenther},
+  Journal                  = {J. Amer. Statist. Assoc.},
+  Year                     = {2002},
+  Number                   = {458},
+  Pages                    = {508--513},
+  Volume                   = {97},
+
+  Owner                    = {fabian},
+  Publisher                = {Taylor \& Francis},
+  Timestamp                = {2015.11.01}
 }
 

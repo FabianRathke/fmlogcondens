@@ -23,7 +23,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-This document will introduce all relevant functions of the package `fmlogcondens`. The package name stands for (f)ast (m)ultivariate (log)-(c)oncave (dens)ity estimation and deals with the estimation of a non-pararametric density, whose logarithm is a concave function. This class includes many well known parametric densities such as normal distributions, Wishart distributions, Gamma distributions with shape parameter larger than one and many more.
+<style>
+.blue-outline {
+   background-color: #9ecff7;
+   padding:10px;
+   display: inline-block;
+}
+</style>
+
+This document introducess the usage of the package `fmlogcondens`. The package name stands for *(f)ast (m)ultivariate (log)-(c)oncave (dens)ity estimation*, which is a non-pararametric density, whose logarithm is a concave function. This class includes many well known parametric densities such as normal distributions, Wishart distributions, Gamma distributions with shape parameter larger than one and many more [@walther2009].
 
 The first part of this document introduces all relevant functions for obtaining estimates of log-concave and mixtures of log-concave densities. The second part gives a small theoretical background of the MLE estimator and how it is approached algorithmically. It also compare this package to the other two relevant R packages: `logcondens` [@duembgen2007] that can be used for univariate data and `LogConcDEAD` [@cule2010] which adresses the multivariate case, though has significanlty longer runtimes. A detailed numerical comparison can be found in our publication [@rathke2015b].
 
@@ -31,34 +39,55 @@ The first part of this document introduces all relevant functions for obtaining 
 
 The estimation of a log-concave density can be formulated as the maximum likelihood problem for any sample $X$ of $n$ points in $\mathbb{R}^d$.
 
-$$ \hat{f}_n := \text{argmax}_{f} \frac{1}{n} \sum_{i=1}^n \log f(X_i), \qquad \text{$f$ is a log-concave density.}$$
+$$ \hat{f}_n = \text{argmax}_{f} \; \sigma(f) \qquad \sigma(f) = \frac{1}{n} \sum_{i=1}^n \log f(X_i) + \int f(x) dx$$
+The integral is a Lagrange term that guarantees that the optimizal density is normalized to 1. Finding the MLE $\hat{f}_n$ is significantly simplified by the fact, that solutons $\log{\hat{f}_n}$ take the form of piecwise-linear functions. Furthermore, [@cule2010] went on to show that $\hat{f}_n$ is uniquely determined by $X$ and a vector $y \in \mathbb{R}^n$, where $y_i = \log(f(X_i))$. Consequently, they formulate the MLE problem in terms of the vector $y$.
 
-The estimation is significantly simplified by the fact, that solutions $\log{\hat{f}_n}$ take the form of piecwise-linear functions. Furthermore, [@cule2010] went on to show that $\hat{f}_n$ is uniquely determined by $X$ and a vector $y \in \mathbb{R}^n$. Consequently, they formulate the MLE problem in terms of the vector $y$. 
+$$
+\sigma(y) = \frac{1}{n} \sum_{i=1}^n y_i + \int f_y(x) dx, \qquad \log f_y(x) = \sup_{\lambda}\left\{\sum_{i=1}^n \lambda_iy_i \;\Big|\; x = \sum_{i=1}^n \lambda_i X_i, \sum_{i=1}^n \lambda_i = 1, \lambda_i \geq 0 \right\}.
+$$
+Their package `LogConcDEAD` implements a solver for this objective function.
 
-A piecewise linear function can be equivalently defined in terms of the slopes and intercepts of the linear functions. Our contribution is the reformulation of the MLE in terms of these slopes and intercepts. We demonstrate in [@rathke2015b] how this leads to sparse solutions (in terms of the number of hyperplanes), which speeds up calculations significantly. While our formulation of the problem is non-convex whereas the one of Cule et al is convex, we proove numerically that our approach yields solutions very close to the optimal one.
+A piecewise concave linear function can be equivalently defined in terms of its slope $a$ and intercept $\beta$. Our contribution is the reformulation of the MLE in terms of these hyperplane parameters:
 
-## Usage
+$$
+\sigma(a,\beta) = \frac{1}{n} \sum_{i=1}^n \log f_{a,\beta}(X_i) + \int f_{a,\beta} (x) dx, \qquad f_{a, \beta} (x) = \min_k (a_k^Tx - \beta_k)
+$$
+This reformulation has two significant advantages: We demonstrate in [@rathke2015b] how this leads to sparse solutions (in terms of the number of hyperplanes), which speeds up calculations significantly. Also our objective is smooth, which allows us to use a quasi-Newton optimization method adapted to large scale optimization problems (BFGS-L) [@nocedal2006]. While our formulation of the problem is non-convex whereas the one of Cule et al. is convex, we proove numerically that our approach yields solutions that are very close to the optimal one.
 
-### Installation
+## Installation
 
-Installation without AVX support:
+### Without AVX support
+
+The most convenient way to install the package is:
 
 ```{r eval=FALSE}
 install.packages("fmlogcondens")
 library(fmlogcondens)
 ```
 
+The drawback of this approach, is that these install binaries that where compiled for generic processors, which exclude AVX optimizations. This significantly increases the runtime of our approach. The next section describes, how to install our package with AVX support.
+
+### With AVX support
+
+To activate AVX support, we will install the package from source. To do this, first download the source code from the CRAN website, with the ending appropriate ending for our operating system (`.tar.gz` for Linux, `.zip` for Windows and `.tgz` for MacOS). Then from the command line do
+
+```
+R CMD INSTALL --configure-args=native path-to-package/fmlogcondens_0.1.0.tar.gz
+```
+
+## Usage
+
+### Estimating a log-concave density
+
 ```{r echo=FALSE, message=FALSE}
 library(fmlogcondens)
 ```
-
-### Estimating a log-concave density
 
 We start with a small sample of 100 points in 2-D. We sample them from a normal density with zero mean and identity covariance matrix. 
 
 ```{r message=FALSE}
 set.seed(222)
-X = matrix(rnorm(200),100,2)
+X = matrix(rnorm(200), 100, 2)
 r <- fmlcd(X) # estimate log-concave density
 ```
 
@@ -66,41 +95,88 @@ The logarithm of the density f(x) is a piecewise-linear concave function and is 
 
 ### Plotting
 
-We can plot the resulting density using functionality of the package `LogConcDEAD`. In order to be able to use all functions in their package, we have to create an object of class `LogConvDEAD` using the function `getinfolcd`. We can then use the function `plot` to display the estimated density as well as the log-density.
+We can plot the resulting density using functionality of the package `LogConcDEAD`. In order to be able to use all functions in their package, we have to create an object of class `LogConvDEAD` using the function `getinfolcd()`. We can then use the function `plot()` to display the estimated density as well as the log-density.
 
-```{r message=FALSE}
+```{r message=FALSE,  out.width = "100%",  out.extra='style="border-color:#FFF;"'}
 library(LogConcDEAD)
-r <- LogConcDEAD::getinfolcd(X,r$logMLE) # create a `LogConvDEAD` object
+r <- LogConcDEAD::getinfolcd(X, r$logMLE) # create a `LogConcDEAD` object
 
-par(mfrow=c(1,2)) #square plots
-plot(r,addp=FALSE,asp=1)
-plot(r,uselog=TRUE,addp=FALSE,asp=1)
+par(mfrow = c(1, 2)) #square plots
+plot(r, addp = FALSE, asp = 1)
+plot(r, uselog = TRUE, addp = FALSE, asp = 1)
 ```
 
 ### Comparing with the density estimate from `LogConcDEAD`
 
 We now estimate the log-concave density $\hat{f}_n$ with maximal log likelihood using the package `LogConcDEAD`. Comparing this estimate with the one from our package reveals that our optimization approach yielded a very similar solution.
 
-```{r message=FALSE}
+```{r message=FALSE, out.width = "100%", out.extra='style="border-color:#FFF;"'}
 rCule <- LogConcDEAD::mlelcd(X)
 
-par(mfrow=c(1,2)) #square plots
-plot(rCule,addp=FALSE,asp=1)
-plot(rCule,uselog=TRUE,addp=FALSE,asp=1)
+par(mfrow = c(1, 2)) #square plots
+plot(rCule, addp=  FALSE, asp = 1)
+plot(rCule, uselog = TRUE, addp = FALSE, asp = 1)
 ```
 
 ### Comparing the performance for larger samples
 
-We will now increase the sample size, in order to demonstrate the advantages of our packages: a very fast algorithm. To this end, we estimate the log-concave density for 500 data points in three dimensions.
+We will now increase the sample size, in order to demonstrate the advantages of our packages: the very fast computation of $\hat{f}_n$. To this end, we estimate the log-concave density for 500 data points in two dimensions using using both approaches.
 
 ```{r message=FALSE}
 set.seed(222)
-X = matrix(rnorm(1500),500,3)
-#system.time(r <- fmlcd(X)) # estimate log-concave density
+X = matrix(rnorm(1000), 500, 2)
+# time estimate for our approach
+system.time(r <- fmlcd(X))
+# time estimate for the approach of Cule et al.
+#system.time(rCule <- mlelcd(X))
+```
+
+We see how the required runtime differs in a magnitude of about 10x. This difference increases dramatically (10000x and more) if we continue to increase the sample size. We now plot the estimated densities and see that they identical.
+
+```{r message=FALSE, out.extra='style="border-color:#FFF;"'}
+r <- LogConcDEAD::getinfolcd(X, r$logMLE) # create a `LogConcDEAD` object
+# plot bost estimates for comparison
+par(mfrow=c(1, 2)) #square plots
+plot(r, addp = FALSE, asp = 1)
+plot(rCule, addp = FALSE, asp = 1)
 ```
 
 ### Estimating a mixture of log-concave densities
 
+Finally, we demonstrate the ability of to estimate mixtures of log-concave densities. To this end, we sample data points from two normal densities with different parameters. 
 
+```{r}
+  library(MASS)
+  set.seed(222)
+  X1 <- mvrnorm(200, c(0, 0), matrix(c(2, 1.5, 1.5, 2), 2, 2))
+  X2 <- mvrnorm(200, c(-2, 2), matrix(c(1, 0, 0, 1), 2, 2))
+  plot(X1[ ,1], X1[ ,2], col="red", pch = 20, xlab = "X", ylab = "Y")
+  points(X2[ ,1], X2[ ,2], col="blue", pch = 20)
+```
+
+Estimate a mixture density having `K=2` classes.
+```{r}
+X <- rbind(X1,X2) # stack both data matrices
+#r <- fmlcdEM(X, K = 2)
+```
+
+Finally, we evaluate the mixture density for a grid of points and plot the results.
+```{r}
+# Create a grid of points for evaluation
+# x <- seq(min(X[ ,1]), max(X[ ,1]), 0.1)
+# y <- seq(min(X[ ,2]), max(X[ ,2]), 0.1)
+# m <- length(x); n <- length(y)
+# XEval = cbind(matrix(rep(x, each = n), ncol = 1), matrix(rep(y, m), ncol = 1))
+# nX = dim(XEval)[1]
+# 
+# # evaluate log-concave density component-wise
+# YA = exp(apply(- r$params[[1]]$a %*% t(XEval) - matrix(rep(r$params[[1]]$b,nX),length(r$params[[1]]$b),nX), 2, min))
+# YB = exp(apply(- r$params[[2]]$a %*% t(XEval) - matrix(rep(r$params[[2]]$b,nX),length(r$params[[2]]$b),nX), 2, min))
+# Y = YA * r$tau[1] + YB * r$tau[2]
+# 
+# contour(x,y,t(matrix(Y,n,m)))
+# points(X1[ ,1], X1[ ,2], col="red", pch = 20, cex=.5)
+# points(X2[ ,1], X2[ ,2], col="blue", pch = 20, cex=.5)
+```
 
 ## References

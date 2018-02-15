@@ -5,7 +5,8 @@
 \title{Optimize MLE objective for a log-concave density}
 \usage{
 callNewtonBFGSLC(X, w, params, paramsKernel, cvhParams, gamma = 1000,
-  verbose = 0, intEps = 0.001, objEps = 1e-07, offset = 0.1)
+  verbose = 0, intEps = 0.001, objEps = 1e-07, offset = 0.1,
+  maxIter = 10000)
 }
 \arguments{
 \item{X}{Set of data points (one sample per row)}
@@ -34,6 +35,8 @@ the optimziation may terminite (default: 1e-7)}
 \item{offset}{Threshold that governs how fast inactive hyperplanes are dropped;
 smaller values correspond to a slower rate of hyperplane deletion
 (default: 1e-1)}
+
+\item{maxIter}{Maximual number of iterations of Newton optimization (default: 1e4)}
 }
 \value{
 List of n hyperplanes that describe the upper convex hull of log(f(x))

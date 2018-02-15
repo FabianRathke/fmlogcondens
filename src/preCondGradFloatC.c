@@ -43,7 +43,7 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
         float *ftInner = calloc(nH,sizeof(float));
 		int sizeElementList = elementListIncrement, counterLocal = 0;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
-        int numElements, idxMax;
+        int numElements, idxMax = 0;
 		/* calculate gradient for samples */
         #pragma omp for private(i,k)
 		for (j=0; j < N; j++) {
@@ -101,8 +101,6 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 			}
 		}
 
-		int ID = omp_get_thread_num();
-
 		/* enforce ordered copying of memory --> keep  */
 		#pragma omp for ordered schedule(static,1)
 		for(j=0; j<omp_get_num_threads(); j++)
@@ -127,7 +125,7 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 	   	float Delta,evalTmp;
         int *idxElements = malloc(nH*sizeof(int));
         int *idxElementsBox = malloc(nH*sizeof(int));
-        int numElements, numElementsBox, idxSave, idxMax, sign;
+        int numElements, numElementsBox, idxSave, idxMax = 0, sign;
         float *preCalcElems = malloc(nH*dim*MBox*sizeof(float));
         int YIdxMin, YIdxMax, idxGet;
 		float *Ytmp = calloc(dim,sizeof(float));

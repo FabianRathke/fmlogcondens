@@ -18,7 +18,7 @@ echo Using target: $TARGET
 if [ $TARGET = native ]; then
   echo "Activate AVX support."
   C_FLAGS="-march=native $C_FLAGS"
-elif [ $TARGET = default ]; then
+else
   echo "Compile without AVX."
   C_FLAGS="$C_FLAGS"
 fi

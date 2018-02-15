@@ -189,7 +189,8 @@ void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox
 		sparseDelta[i] = (box[i+dim] - box[i])/N;
 	}
     /* variables for checking boxes and adding subgrid points */
-    int maxIdx; int counterNumBoxes = 0; int outsideCVH;
+    //int maxIdx; 
+	int counterNumBoxes = 0; int outsideCVH;
     int numPointsAdded = 0; int numPointsAddedOld;
     double funcEvalLocal;
 

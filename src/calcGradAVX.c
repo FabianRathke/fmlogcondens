@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <R.h>
-
+#include <headers.h>
 
 #ifdef __AVX__
 #include "avx_mathfun.h"
@@ -294,8 +294,6 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 	// Calculate gradient for grid points
 	TermBLocal = 0; *TermB = 0;
 	TermALocal = 0;	*TermA = 0;
-    double part1, part2, part3, part4, part5, part6;
-	part1 = part2 = part3 = part4 = part5 = part6 = 0;
 	long int totalHyperplanes;
 	int countA, countB, countC, countD; countA = countB = countC = countD = 0;
 	#pragma omp parallel
@@ -304,17 +302,13 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 		float stInnerMax; float stInnerCorrection = 0;
 		float sum_st, sum_st_inv, tmpVal, sum_st_inv2;
 		float *stInner;
-		//assert(!posix_memalign((void **) &stInner,ALIGN,8*nH*sizeof(float)));
-		stInner = memalign(ALIGN,8*nH*sizeof(float)); 
 		float *grad_st_private = calloc(nH*(dim+1),sizeof(float));
 		float *influencePrivate = calloc(nH,sizeof(float));
 		//float Delta;
         float *aLocal, *bLocal;
-        //assert(!posix_memalign((void **) &aLocal, ALIGN, dim*nH*sizeof(float)));
-        //assert(!posix_memalign((void **) &bLocal, ALIGN, nH*sizeof(float)));
-		aLocal = memalign(ALIGN,dim*nH*sizeof(float)); 
-		bLocal = memalign(ALIGN,8*nH*sizeof(float)); 
-
+		alloc_aligned_mem(8*nH,ALIGN,&stInner); 
+		alloc_aligned_mem(dim*nH,ALIGN,&aLocal); 
+		alloc_aligned_mem(8*nH,ALIGN,&bLocal); 
 		int *idxElements = malloc(8*nH*sizeof(int));
 		int *idxElementsBox = malloc(8*nH*sizeof(int));
 		int numElements, numElementsBox[8], idxSave; //idxMax;
@@ -470,7 +464,8 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
 			}
 
 		}
-		free(Ytmp); free(stInner); free(grad_st_private); free(grad_ft_private); free(influencePrivate); free(idxElements); free(idxElementsBox); free(aLocal); free(bLocal);
+		free(Ytmp); free(grad_st_private); free(grad_ft_private); free(influencePrivate); free(idxElements); free(idxElementsBox); 
+		free_aligned_mem(aLocal); free_aligned_mem(bLocal); free_aligned_mem(stInner);  
 	} // end of pragma parallel 
 	*TermB = (double) TermBLocal*weight;
 	for (i=0; i < nH*(dim+1); i++) {
@@ -493,11 +488,11 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
         float *grad_ft_private = calloc(nH*(dim+1),sizeof(float));
 		float *ftInner;
 		//assert(!posix_memalign((void **) &ftInner,ALIGN,8*nH*sizeof(float)));
-    	ftInner = memalign(ALIGN,8*nH*sizeof(float)); 
-    	int *idxElements = malloc(nH*sizeof(int));
+		alloc_aligned_mem(8*nH,ALIGN,&ftInner); 
+		int *idxElements = malloc(nH*sizeof(int));
         int numElements;
         float *t;
-		int *idxElementsBox;
+		int *idxElementsBox = NULL;
         __m256 ftMax,sum_ft,xw,factor_,val1,val2,sum_ft_inv;
         factor_ = _mm256_set1_ps(factor);
   		#pragma omp for schedule(dynamic) reduction(+:TermALocal)
@@ -525,7 +520,7 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
                 gradA[i] += (double) grad_ft_private[i];
             }
         }
-		free(ftInner); free(grad_ft_private); free(idxElements);
+		free_aligned_mem(ftInner); free(grad_ft_private); free(idxElements);
 	}
 	*TermA = (double) TermALocal;
 	free(grad_st_tmp); free(gridLocal); free(aGamma); free(bGamma);

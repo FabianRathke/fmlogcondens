@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export TARGET=generic
+export OUT=src/Makevars.win
+
+echo Using FMLOGCONDENS_CONFIGURE_ARGS: $FMLOGCONDENS_CONFIGURE_ARGS
+
+#sh configure $FMLOGCONDENS_CONFIGURE_ARGS
+# AVX not working for WINDOWS yet
+sh configure generic

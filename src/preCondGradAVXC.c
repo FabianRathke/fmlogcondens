@@ -154,11 +154,10 @@ void makeElementListExact(float* aGamma, float* bGamma, float* ftStore, float* X
 
 void makeElementListExactY(float* aGamma, float* bGamma, float* ftStore, float* X, int dim, int nH, int N, int* idxMax, int* elementListLocal, int* counterLocal, int* elementIds) {
     int i, k, mask;
-    __m256 ft, cmp, a, x, val1, idx, max;
+    __m256 ft, cmp, a, x, val1, max;
     __m256i idxSelect;
     float ftMax;
     struct maxS p;
-    idx = _mm256_set_ps(7,6,5,4,3,2,1,0);
     max = _mm256_set1_ps(-FLT_MAX);
     ftMax = -FLT_MAX;
 
@@ -301,11 +300,11 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 	*elementList = malloc(**elementListSize*sizeof(int));
 
 	float *aGamma, *aTransGamma, *bGamma;
-	aGamma = memalign(ALIGN,dim*nH*sizeof(float));
-	aTransGamma = memalign(ALIGN,dim*nH*sizeof(float));
-	bGamma = memalign(ALIGN,nH*sizeof(float));
+	alloc_aligned_mem(dim*nH,ALIGN,&aGamma);
+	alloc_aligned_mem(dim*nH,ALIGN,&aTransGamma);
+	alloc_aligned_mem(nH,ALIGN,&bGamma);
 
-	int i,j,k,l;
+	int i,j,k;
     float *gridLocal = malloc(dim*sizeof(float));
 	int counter = 0, savedValues = 0, savedValues2 = 0;
  
@@ -322,13 +321,13 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 		}
 		bGamma[i] = gamma*b[i];
 	}
-    double iStart = cpuSecond();
+    //double iStart = cpuSecond();
 
 	counter = 0; savedValues = 0; savedValues2 = 0;
 	#pragma omp parallel
 	{   
 		float* ftInner;
-		ftInner = memalign(ALIGN,nH*sizeof(float));
+		alloc_aligned_mem(nH,ALIGN,&ftInner);
 		int sizeElementList = elementListIncrement;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
 		int *idxMax = malloc(sizeof(int));
@@ -378,8 +377,6 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 			}
 		}
 
-		int ID = omp_get_thread_num();
-
 		/* enforce ordered copying of memory --> keep  */
 		#pragma omp for ordered schedule(static,1)
 		for(j=0; j<omp_get_num_threads(); j++)
@@ -391,18 +388,18 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				savedValues += *counterLocal;
 			}
 		}
-		free(elementListLocal); free(ftInner); free(idxMax); free(counterLocal);
+		free(elementListLocal); free_aligned_mem(ftInner); free(idxMax); free(counterLocal);
 	}
-    double timeTotal = cpuSecond()-iStart;
+    //double timeTotal = cpuSecond()-iStart;
 
 	double i1, part1, part2, part3, part4, part5;
 	part1 = part2 = part3 = part4 = part5 = 0;
 
-	iStart = cpuSecond();
+	//iStart = cpuSecond();
 	#pragma omp parallel
 	{
 		float *stInner; 
-		stInner = memalign(ALIGN,8*nH*sizeof(float));
+		alloc_aligned_mem(8*nH,ALIGN,&stInner);
 
 		int sizeElementList = elementListIncrement;
 		int *elementListLocal = malloc(sizeElementList*sizeof(int));
@@ -410,18 +407,18 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
         int *idxElementsBox = malloc(8*nH*sizeof(int));
         int numElements, numElementsOld, numElementsBox[8], totalElements = 0;
 		float *aLocal, *bLocal;
-		aLocal = memalign(ALIGN,dim*nH*sizeof(float));
-		bLocal = memalign(ALIGN,nH*sizeof(float));
+		alloc_aligned_mem(dim*nH,ALIGN,&aLocal);
+		alloc_aligned_mem(nH,ALIGN,&bLocal);
 		float *Ytmp = calloc(8*dim,sizeof(float));
 		int *idxEntriesLocal = malloc(M*sizeof(int));
 		int *maxElementLocal = malloc(M*sizeof(int));
 		int *numEntriesLocal = malloc(M*sizeof(int));
 	    int *idxMax = malloc(sizeof(int));
         int *counterLocal = malloc(sizeof(int));
-		int l,n,m,p,q;
+		int l,n,m,p;
 		__m256 stMax_;
 		*counterLocal = 0;
-		#pragma omp for schedule(dynamic,1) private(j,i,k,q,p)
+		#pragma omp for schedule(dynamic,1) private(j,i,k,p)
         for (n = 0; n < numBoxes; n+=8) {
 			/* check for active hyperplanes */
             /* eval all hyperplanes for some corner point of the box */
@@ -512,11 +509,11 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 				savedValues2 += totalElements;
 			}
         }
-  		free(Ytmp); free(stInner); free(idxElements); free(idxElementsBox); free(elementListLocal); free(idxEntriesLocal); free(maxElementLocal); free(numEntriesLocal); free(idxMax); free(counterLocal); free(aLocal); free(bLocal);
+  		free(Ytmp); free(stInner); free(idxElements); free(idxElementsBox); free(elementListLocal); free(idxEntriesLocal); free(maxElementLocal); free(numEntriesLocal); free(idxMax); free(counterLocal); free_aligned_mem(aLocal); free_aligned_mem(bLocal);
 
 	} /* end of pragma parallel */
 	**elementListSize = counter;
-	free(aGamma); free(bGamma); free(aTransGamma); 
+	free_aligned_mem(aGamma); free_aligned_mem(bGamma); free_aligned_mem(aTransGamma); 
 }
 #else
 void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, int* maxElement, int* idxEntries, float* X, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, int numBoxes, double* a, double* aTrans, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH) {

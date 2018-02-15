@@ -2,6 +2,23 @@
 #include <string.h>
 #include <float.h>
 #include <sys/time.h>
+#include <malloc.h>
+
+void alloc_aligned_mem(int numEntries, int align, float **ptr) {
+#ifndef _WIN32
+	*ptr = memalign(align,numEntries*sizeof(float));
+#else
+	*ptr = _aligned_malloc(((size_t) numEntries)*sizeof(float),(size_t) align);
+#endif
+}
+
+void free_aligned_mem(float *ptr) {
+#ifndef _WIN32
+	free(ptr);
+#else
+	_aligned_free(ptr);
+#endif
+}
 
 void unzipParams(double *params, double *a, double *b, int dim, int nH, int transpose) {
     int i,j;

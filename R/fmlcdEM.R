@@ -46,7 +46,7 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
   minLogLike <- -Inf
   logLike <- matrix(0, maxIter, 1)
   densEst <- matrix(0, n, K)
-  params <- matrix(list(), 1, 2)
+  params <- matrix(list(), 1, K)
   # optimization parameters
   intEps = 1e-4
   objEps = 1e-7
@@ -95,6 +95,12 @@ fmlcdEM <- function(X, K = 2, posterior, verbose=0, maxIter = 50) {
     tau <- apply(posterior, 2, sum) / sum(posterior)
   }
 
-  r <- list("params" = params, "densEst" = densEst, "tau" = tau)
+  paramsReturn <- matrix(list(), 1, K)
+  for (j in 1:K) {
+    nH <- length(params[[j]])/(d+1)
+    paramsReturn[[j]]$a = matrix(params[[j]][1:(d*nH)],nH,d)
+    paramsReturn[[j]]$b = params[[j]][(d*nH+1):((d+1)*nH)]
+  }
+  r <- list("params" = paramsReturn, "densEst" = densEst, "tau" = tau)
   return(r)
 }

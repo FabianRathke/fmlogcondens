@@ -13,7 +13,6 @@ void calcGradC(double* gradA, double* gradB, double* influence, double* TermA, d
 	int i,j,k,l;
 	double factor = 1/gamma;
 	double *gridLocal = malloc(dim*sizeof(double));	
-	double epsCalcExp = -25; /* this is the maximal difference between the maximum and any other hyperplane in log-space; increase this value for more accuracy */
 	double TermALocal, TermBLocal;
 	int XCounterGlobal = 0;	
 
@@ -51,7 +50,7 @@ void calcGradC(double* gradA, double* gradB, double* influence, double* TermA, d
 		double Delta,evalTmp;
 		int *idxElements = malloc(nH*sizeof(int));
 		int *idxElementsBox = malloc(nH*sizeof(int));
-		int numElements, numElementsBox, idxSave, idxMax, sign;
+		int numElements, numElementsBox, idxSave, idxMax = 0, sign;
 		double *preCalcElems = malloc(nH*dim*MBox*sizeof(double));
 		int YIdxMin, YIdxMax, idxGet, totalHyperplanes = 0;
 

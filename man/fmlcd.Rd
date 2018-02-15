@@ -5,7 +5,7 @@
 \title{Estimates a Log-Concave Density}
 \usage{
 fmlcd(X, w = rep(1/nrow(X), nrow(X)), init = "", verbose = 0,
-  intEps = 1e-04, objEps = 1e-07, offset = 0.1)
+  intEps = 1e-04, objEps = 1e-07, offset = 0.1, maxIter = 10000)
 }
 \arguments{
 \item{X}{Matrix of data points (one sample per row)}
@@ -30,6 +30,8 @@ Modification of this value is not recommended. (default: 1e-7)}
 \item{offset}{Smaller values correspond to slower hyperplane reduction.
 Offset should be a value smaller than 1. Modification of this value is not
 recommended. (default: 1e-1)}
+
+\item{maxIter}{Number of iterations in the main optimization (default: 1e4)}
 }
 \value{
 Parametrization of f(x) in terms of hyperplanes and function

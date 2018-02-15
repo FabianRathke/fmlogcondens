@@ -13,7 +13,6 @@ void calcGradFloatC(double* gradA, double* gradB, double* influence, double* Ter
 	int i,j,k;
 	float factor = 1/gamma;
 	float *gridLocal = malloc(dim*sizeof(float));	
-	float epsCalcExp = -25; /* this is the maximal difference between the maximum and any other hyperplane in log-space; increase this value for more accuracy */
 	float TermALocal, TermBLocal;
 	
 	/* initialize some variables */

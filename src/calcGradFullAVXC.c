@@ -94,23 +94,17 @@ void inline calcInfluence(int numElements, int* idxElements, float* ftInner, flo
 void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH)
 {
 	/* create aligned memory */
-/*	float *aGamma = memalign(ALIGN,dim*nH*sizeof(float));
-	float *bGamma = memalign(ALIGN, nH*sizeof(float));
-	float *XAligned = memalign(ALIGN, N*dim*sizeof(float));
-	float *XWAligned = memalign(ALIGN, N*sizeof(float));*/
 	float *aGamma, *bGamma, *XAligned, *XWAligned;
-	int errorVal = 0;
-	errorVal += posix_memalign((void **) &aGamma, ALIGN, dim*nH*sizeof(float));
-	errorVal += posix_memalign((void **) &bGamma, ALIGN, nH*sizeof(float));
-	errorVal += posix_memalign((void **) &XAligned, ALIGN, N*dim*sizeof(float));
-	errorVal += posix_memalign((void **) &XWAligned, ALIGN, N*sizeof(float));
-	if (errorVal != 0) { Rprintf("Error when using posix_memalign\n"); }
+	
+	alloc_aligned_mem(dim*nH,ALIGN,&aGamma);
+	alloc_aligned_mem(nH,ALIGN,&bGamma);
+	alloc_aligned_mem(N*dim,ALIGN,&XAligned);
+	alloc_aligned_mem(N,ALIGN,&XWAligned);
 
 	memcpy(XAligned,X,N*dim*sizeof(float));
 	memcpy(XWAligned,XW,N*sizeof(float));
     int i,j,k;
     float factor = 1/gamma, TermALocal, TermBLocal;
-	int countInner;
 
     /* initialize some variables */
     for (i=0; i < nH; i++) {
@@ -120,17 +114,17 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
         bGamma[i] = gamma*b[i];
     }
    	TermALocal = 0; 
-	countInner = 0;
 	
 	// sets number of threads to the number of available threads (a less agressive option would be the number of cores: omp_get_max_threads())
 	//omp_set_num_threads(omp_get_num_procs());
 
     #pragma omp parallel
     {   
-        float *ftInner = memalign(ALIGN,8*nH*sizeof(float));
+    	float *ftInner;
+		alloc_aligned_mem(8*nH,ALIGN,&ftInner);
         float *grad_ft_private = calloc(nH*(dim+1),sizeof(float));
      	int *idxElements = malloc(nH*sizeof(int));
-        int numElements, idxSave;
+        int numElements;
 		float *t;
 		__m256 ftMax,sum_ft,xw,factor_,val1,val2,sum_ft_inv,ones;
 		factor_ = _mm256_set1_ps(factor);
@@ -156,21 +150,22 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
                 gradA[i] += grad_ft_private[i];
             }
         }
-        free(ftInner); free(grad_ft_private); free(idxElements);
+        free_aligned_mem(ftInner); free(grad_ft_private); free(idxElements);
     }
 
 	TermBLocal = 0;
     #pragma omp parallel 
     {   
-        float *ftInner = memalign(ALIGN,8*nH*sizeof(float));
+        float *ftInner, *Ytmp;
+	  	alloc_aligned_mem(8*nH,ALIGN,&ftInner);
+		alloc_aligned_mem(8*dim,ALIGN,&Ytmp);
+
         float *grad_ft_private = calloc(nH*(dim+1),sizeof(float));
      	int *idxElements = malloc(nH*sizeof(int));
-        int numElements, idxSave;
+        int numElements;
 		float *t;
-		float *Ytmp = memalign(ALIGN,8*dim*sizeof(float));
 		float *influencePrivate = calloc(nH,sizeof(float));
-		__m256 ftMax,sum_ft,xw,factor_,factorNeg_,val1,val2,sum_ft_inv,sum_ft_inv2,ones,stInnerCorrection;
-		factor_ = _mm256_set1_ps(factor);
+		__m256 ftMax,sum_ft,factorNeg_,val1,sum_ft_inv,sum_ft_inv2,ones,stInnerCorrection;
 		factorNeg_ = _mm256_set1_ps(-factor);
 		ones = _mm256_set1_ps(1);
         // calculate gradient for grid points
@@ -202,14 +197,14 @@ void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* T
                 gradB[i] -= grad_ft_private[i]*weight;
             }
         }
-        free(ftInner); free(grad_ft_private); free(idxElements); free(influencePrivate); free(Ytmp);
+        free_aligned_mem(ftInner); free(grad_ft_private); free(idxElements); free(influencePrivate); free_aligned_mem(Ytmp);
     }
 	TermBLocal *= weight;
 
 	*TermA += TermALocal;
 	*TermB += TermBLocal;
 
-	free(bGamma); free(aGamma); free(XAligned); free(XWAligned);
+	free_aligned_mem(bGamma); free_aligned_mem(aGamma); free_aligned_mem(XAligned); free_aligned_mem(XWAligned);
 }
 #else
 void calcGradFullAVXC(double* gradA, double* gradB, double* influence, double* TermA, double* TermB, float* X, float* XW, float* grid, unsigned short int* YIdx, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH)  {

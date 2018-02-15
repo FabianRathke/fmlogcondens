@@ -56,20 +56,25 @@ This reformulation has two significant advantages: We demonstrate in [@rathke201
 
 ## Installation
 
-### Without AVX support
+### Standard Installation
 
 The most convenient way to install the package is:
 
 ```{r eval=FALSE}
 install.packages("fmlogcondens")
-library(fmlogcondens)
 ```
 
-The drawback of this approach, is that these install binaries that where compiled for generic processors, which exclude AVX optimizations. This significantly increases the runtime of our approach. The next section describes, how to install our package with AVX support.
+The drawback of this approach, is that these install binaries that where compiled for generic processors, which exclude AVX optimizations. See the next section, on how to activate AVX. 
 
-### With AVX support
+### With AVX support (Linux and MacOS only)
 
-To activate AVX support, we will install the package from source. To do this, first download the source code from the CRAN website, with the ending appropriate ending for our operating system (`.tar.gz` for Linux, `.zip` for Windows and `.tgz` for MacOS). Then from the command line do
+AVX is the successor to SSE and MMX, and denotes the ability of a modern CPU to do certain simple computations (addition, multiplication, ...) in parallel on each core (not to be confused with the ability to split workloads across many cores). To activate AVX, we will install the package from source. To do this, we first download the source code from CRAN: https://cran.r-project.org/web/packages/fmlogcondens/index.html. Then from within R we run the command:
+
+```{r}
+install.packages("path-to-package/fmlogcondens_0.1.0.tar.gz", configure.args = "native", type = "source")
+```
+
+Alternatively we can execute the following command from the shell
 
 ```
 R CMD INSTALL --configure-args=native path-to-package/fmlogcondens_0.1.0.tar.gz
@@ -79,7 +84,7 @@ R CMD INSTALL --configure-args=native path-to-package/fmlogcondens_0.1.0.tar.gz
 
 ### Estimating a log-concave density
 
-```{r echo=FALSE, message=FALSE}
+```{r message=FALSE}
 library(fmlogcondens)
 ```
 

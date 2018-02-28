@@ -3,7 +3,6 @@
 #include <string.h>
 #include <float.h>
 #include <time.h>
-#include <omp.h>
 #include <headers.h>
 
 void sumVec(double *A, double *B, double *C, int n) {

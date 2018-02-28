@@ -4,9 +4,8 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <R_ext/Lapack.h>
-#include <omp.h>
 #include <R.h>
-
+#include <headers.h>
 
 void recalcParamsC(double* X, double* y, int* T, int *lenT, int *dim_, double* aOptNew, double* bOptNew)
 {

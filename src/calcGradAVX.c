@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <stdio.h>
-#include <omp.h>
 #include <float.h>
 #include <limits.h>
 #include <sys/time.h>

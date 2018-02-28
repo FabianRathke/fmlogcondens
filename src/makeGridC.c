@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
+#include <headers.h>
 #include <limits.h>
 #include <R.h>
 

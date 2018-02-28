@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <omp.h>
 #include <string.h>
 #include <float.h>
 #include <limits.h>

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
-#include <omp.h> 
 #include <headers.h>
 
 void sumGrad(double* grad, double* gradA, double* gradB, int n) {

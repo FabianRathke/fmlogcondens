@@ -4,6 +4,10 @@ __m256 exp256_ps(__m256 x);
 __m256 log256_ps(__m256 x);
 #endif
 
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
+
 #include <R.h>
 
 extern void setGridDensity(double *box, int dim, int sparseGrid, int *N, int *M, double **grid, double* weight);

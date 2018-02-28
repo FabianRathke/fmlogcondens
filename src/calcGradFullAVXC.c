@@ -3,13 +3,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/time.h>
-#include <omp.h>
 #include <float.h>
 #include <math.h>
+#include <headers.h>
 
 #ifdef __AVX__
-#include <headers.h>
-#include <immintrin.h>
 #define ALIGN 32
 
 void inline evalHyperplane(float* aGamma, float* bGamma, int* numElements, int* idxElements, float* ftInner, float* XAligned, int dim, int nH, int N, __m256* sum_ft, __m256* ftMax) {

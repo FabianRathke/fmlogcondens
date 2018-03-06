@@ -1,7 +1,7 @@
 Package: fmlogcondens
 Type: Package
 Title: Fast Multivariate Log-Concave Density Estimation
-Version: 0.1.0
+Version: 1.0.0
 Author: Fabian Rathke, Christoph Schnörr
 Maintainer: Fabian Rathke <frathke@gmail.com>
 Description: More about what it does (maybe more than one line)

@@ -1,6 +1,6 @@
+/* created by calling tools::package_native_routine_registration_skeleton('fmlogcondens',,,FALSE) from R */
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
-//#include <headers.h>
 
 /* FIXME:
    Check these declarations against the C/Fortran source code.
@@ -28,5 +28,6 @@ void R_init_fmlogcondens(DllInfo *dll)
 {   
     R_registerRoutines(dll, CEntries, NULL, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
+	R_forceSymbols(dll, TRUE);
 }
 

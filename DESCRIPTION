@@ -10,14 +10,16 @@ Description: A fast solver for the maximum likelihood estimator (MLE) of a
   multivariate log-concave probability function. Given a sample X, it estimates 
   a non-parametric density function whose logarithm is a concave function. Many 
   well-known parametric densities belong to that class, among them the normal 
-  density, the uniform density, the exponential distribution and many more. 
-  This package constitutes an alternative to the package logcondens, which is 
-  confined to the univariate case and the package LogConcDEAD, which also 
-  adresses the mutlivariate case but has much longer runtimes. See the vignette 
-  for a more thorough comparison between the two. [Reference: Fabian Rathke, 
-  Christoph Schnörr (2015), <doi:https://doi.org/10.1515/auom-2015-0053>]
+  density, the uniform density, the exponential distribution and many more. This
+  package provides functions for the estimation of a log-concave density and
+  a mixture of log-concave densities in multiple dimensions. While being similar
+  to the package LogConcDEAD, fmlogcondens provides much fast run times for 
+  large samples (>= 250 points). As a reference see Fabian Rathke, Christoph 
+  Schnörr (2015), <doi:10.1515/auom-2015-0053>.
 License: GPL (>= 2)
-Depends:
+URL: https://github.com/FabianRathke/fmlogcondens
+Depends: R (>= 3.2.4)
+Imports:
 	geometry,
 	MASS,
 	mclust,

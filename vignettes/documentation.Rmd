@@ -210,7 +210,7 @@ YA = exp(apply(- r$params[[1]]$a %*% t(XEval) - matrix(rep(r$params[[1]]$b,nX),l
 YB = exp(apply(- r$params[[2]]$a %*% t(XEval) - matrix(rep(r$params[[2]]$b,nX),length(r$params[[2]]$b),nX), 2, min))
 Y = YA * r$tau[1] + YB * r$tau[2]
 
-contour(x,y,t(matrix(Y,n,m)))
+contour(x,y,t(matrix(Y,n,m)), xlab = "X", ylab = "Y")
 points(X1[ ,1], X1[ ,2], col="red", pch = 20, cex=.5)
 points(X2[ ,1], X2[ ,2], col="blue", pch = 20, cex=.5)
 ```

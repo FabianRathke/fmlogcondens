@@ -463,12 +463,13 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 		}
 		double timeB = cpuSecond()-timer;
 		if (verbose > 1 && (iter < 10 || iter % 10 == 0)) {
-			Rprintf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
+			//Rprintf("%d: %.5f (%.4f, %.5f, %d) \t (lambdaSq: %.4e, t: %.0e, Step: %.4e) \t (Nodes per ms: %.2e)  %d \n",iter,funcValStep,-*TermA*n,*TermB,nH,lambdaSq,step,lastStep,(lenY+n)/1000/timeB*nH, updateListInterval);
+			Rprintf("%d: Objective: %.4f, Step: %.2e (Log-Like: %.2f, Integral: %.5f, # hyperplanes: %d) \t Nodes per ms: %.2e \n",iter,funcValStep,lastStep,-*TermA*n,*TermB,nH,(lenY+n)/1000/timeB*nH);
 		}
 	}
 	double timeB = cpuSecond();
 	if (verbose > 0) {
-		Rprintf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,(*TermA)*n,fabs(1-*TermB),timeB-timeA);
+		Rprintf("Optimization with L-BFGS (CPU) finished: %d Iterations, %d hyperplanes remaining, LogLike: %.4f, Integral: %.4e, Run time: %.2fs\n",iter,nH,-(*TermA)*n,fabs(1-*TermB),timeB-timeA);
 	}
 	memcpy(params_,params,*lenP*sizeof(double));
 

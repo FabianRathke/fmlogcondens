@@ -34,3 +34,12 @@ I already use the future URL of the package, when describing the installation pr
 ## Downstream dependencies
 
 No downstream dependencies as this is the initial release.
+
+
+
+## Resubmission
+
+As requested by the first submission, I added
+
+* the author Giovanni Garberoglio with the tag "cph" due to the use of avx_mathfun.h,
+* a reference which contains background about our method at the end of the description field.

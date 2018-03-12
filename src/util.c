@@ -2,11 +2,19 @@
 #include <string.h>
 #include <float.h>
 #include <sys/time.h>
+#include <headers.h>
+#ifdef _WIN32
 #include <malloc.h>
+#endif
+
 
 void alloc_aligned_mem(int numEntries, int align, float **ptr) {
 #ifndef _WIN32
-	*ptr = memalign(align,numEntries*sizeof(float));
+	int returnVal;
+	returnVal = posix_memalign((void **) ptr, align, numEntries*sizeof(float));
+	if (returnVal != 0) {
+		error("Memory allocation failed\n");
+	}
 #else
 	*ptr = _aligned_malloc(((size_t) numEntries)*sizeof(float),(size_t) align);
 #endif

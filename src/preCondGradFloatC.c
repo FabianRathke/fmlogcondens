@@ -7,8 +7,6 @@
 #include <limits.h>
 #include <immintrin.h>
 #include <stdint.h>
-#include <assert.h>
-
 
 void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries, int* maxElement, int* idxEntries, float* X, float* grid, unsigned short int* YIdx, int *numPointsPerBox, float* boxEvalPoints, int numBoxes, double* a, double* b, float gamma, float weight, float* delta, int N, int M, int dim, int nH, int MBox)
 {
@@ -101,11 +99,16 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 			}
 		}
 
+#ifdef _OPENMP
+        int numThreads = omp_get_num_threads();
+#else
+        int numThreads = 1;
+#endif
+
 		/* enforce ordered copying of memory --> keep  */
 		#pragma omp for ordered schedule(static,1)
-		for(j=0; j<omp_get_num_threads(); j++)
+		for(j = 0; j < numThreads; j++)
 		{
-			assert( j==ID );
 			#pragma omp ordered
 			{
 				memcpy((*elementList)+savedValues,elementListLocal,counterLocal*sizeof(int));
@@ -277,10 +280,15 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 				**elementListSize = counter;
             }
         }
+#ifdef _OPENMP
+        int numThreads = omp_get_num_threads();
+#else
+        int numThreads = 1;
+#endif
 
         /* enforce ordered copying of memory */
         #pragma omp for ordered schedule(static,1)
-        for(j=0; j<omp_get_num_threads(); j++)
+        for(j = 0; j < numThreads; j++)
         {
             #pragma omp ordered
             {

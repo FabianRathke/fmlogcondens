@@ -1,11 +1,9 @@
 #include <math.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include <stdio.h>
 #include <float.h>
 #include <limits.h>
 #include <sys/time.h>
-#include <assert.h>
 #include <string.h>
 #include <stdint.h>
 #include <R.h>
@@ -486,7 +484,6 @@ void calcGradAVXC(double* gradA, double* gradB, double* influence, double* TermA
     {
         float *grad_ft_private = calloc(nH*(dim+1),sizeof(float));
 		float *ftInner;
-		//assert(!posix_memalign((void **) &ftInner,ALIGN,8*nH*sizeof(float)));
 		alloc_aligned_mem(8*nH,ALIGN,&ftInner); 
 		int *idxElements = malloc(nH*sizeof(int));
         int numElements;

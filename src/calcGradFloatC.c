@@ -29,14 +29,11 @@ void calcGradFloatC(double* gradA, double* gradB, double* influence, double* Ter
 		influence[i] = 0;
 	}
 
-	//omp_set_num_threads(omp_get_num_procs());
 
 	/* calculate gradient for samples */ 
 	TermALocal = 0;	
 	#pragma omp parallel
     {
-      	/* const int nthreads = omp_get_num_threads();
-		 * printf("Number of threads: %d\n",nthreads); */
    	  	float ftInnerMax;
         float sum_ft, sum_ft_inv;
         float *ft = calloc(nH,sizeof(float));

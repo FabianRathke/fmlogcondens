@@ -279,8 +279,6 @@ void calcGradC(double* gradA, double* gradB, double* influence, double* TermA, d
 	/* calculate gradient for samples X */ 
 	#pragma omp parallel 
     {
-      	/* const int nthreads = omp_get_num_threads();
-		 * printf("Number of threads: %d\n",nthreads); */
    	  	double ftInnerMax;
         double sum_ft, sum_ft_inv;
         double *ft = calloc(nH,sizeof(double));

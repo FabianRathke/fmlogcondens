@@ -5,9 +5,7 @@
 #include <float.h>
 #include <limits.h>
 #include <stdint.h>
-#include <assert.h>
 #include <sys/time.h>
-#include <malloc.h>
 
 #ifdef __AVX__
 #include <headers.h>
@@ -376,11 +374,16 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
 			}
 		}
 
+#ifdef _OPENMP
+		int numThreads = omp_get_num_threads();
+#else
+		int numThreads = 1;
+#endif
+			
 		/* enforce ordered copying of memory --> keep  */
 		#pragma omp for ordered schedule(static,1)
-		for(j=0; j<omp_get_num_threads(); j++)
+		for(j = 0; j < numThreads; j++)
 		{   
-			assert( j==ID );
 			#pragma omp ordered
 			{   
 				memcpy((*elementList)+savedValues,elementListLocal,*counterLocal*sizeof(int));
@@ -494,9 +497,15 @@ void preCondGradAVXC(int** elementList, int** elementListSize, int* numEntries, 
             }
         }
 
+#ifdef _OPENMP
+		int numThreads = omp_get_num_threads();
+#else
+		int numThreads = 1;
+#endif
+
         // enforce ordered copying of memory
         #pragma omp for ordered schedule(static,1)
-        for(j=0; j<omp_get_num_threads(); j++)
+        for(j = 0; j < numThreads; j++)
         {
             #pragma omp ordered
             {

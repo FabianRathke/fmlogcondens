@@ -152,9 +152,14 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
     	XToBox[i] = list[i].XToBox;
         //B[list[i].id] = i;
     }
-
-	float *boxEvalPointsFloat = malloc(numBoxes*dim*3*sizeof(float));
-	for (i=0; i < numBoxes*dim*3; i++) { boxEvalPointsFloat[i] = (float) boxEvalPoints[i]; }
+	
+#ifdef __AVX__
+	int nB = ((int) (numBoxes/8) + 1)*8;
+#else
+    int nB = numBoxes
+#endif
+	float *boxEvalPointsFloat = malloc(nB*dim*3*sizeof(float));
+	for (i=0; i < nB*dim*3; i++) { boxEvalPointsFloat[i] = (float) boxEvalPoints[i]; }
 	// only the first entry in each dimension is required
 	float *gridFloat = malloc(dim*sizeof(float));
 	double *gridDouble = malloc(dim*sizeof(double));
@@ -241,6 +246,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	copyVector(newtonStep,grad,nH*(dim+1),1);
 	// LBFGS params
 	int m = (int)(nH/5) < 40 ? (int) nH/5 : 40;
+	m = m < 1 ? 1 : m;
 	double *s_k = calloc(*lenP*m,sizeof(double));
 	double *y_k = calloc(*lenP*m,sizeof(double));
 	double *sy = calloc(m,sizeof(double));
@@ -256,6 +262,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	int *elementListSize = NULL, *elementList = NULL, *numEntries = NULL, *maxElement=NULL, *idxEntries=NULL, *numEntriesCumSum = NULL;
 	// start the main iteration
 	for (iter = 0; iter < maxIter; iter++) {
+		printf("%d\n",iter);
 		nHHist[iter] = nH;
 		timer = cpuSecond();
 		updateList--;
@@ -474,5 +481,11 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 
 	free(delta); free(deltaD); free(XF); free(XWF); free(params); free(boxEvalPointsFloat); free(gridFloat); free(gridDouble); free(a); free(b); free(aTrans); free(influence);
 	free(grad); free(gradOld); free(gradA); free(gradB); free(newtonStep); free(paramsNew); free(nHHist); free(activePlanes); free(inactivePlanes); free(gradCheck);
-	free(numEntries); free(numEntriesCumSum); free(idxEntries); free(maxElement); free(s_k); free(y_k); free(sy); free(syInv);
+	// free variales for preconditioner
+	free(numEntries); free(numEntriesCumSum); free(idxEntries); free(maxElement); free(elementList); free(elementListSize);
+	// free variables for BFGS optimization
+	free(s_k); free(y_k); free(sy); free(syInv);
+	// free grid variables
+    free(numPointsPerBox); free(YIdx); free(XToBox); free(boxEvalPoints); free(grid);
+	free(X); free(XW); free(TermA); free(TermB);
 }

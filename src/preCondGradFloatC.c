@@ -12,6 +12,7 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 {
 	/* initialize elementList */
 	static const int elementListIncrement = 10000000;
+	free(*elementListSize); free(*elementList);
 	*elementListSize = malloc(sizeof(int)); **elementListSize = elementListIncrement;
 	*elementList = malloc(**elementListSize*sizeof(int));
 	

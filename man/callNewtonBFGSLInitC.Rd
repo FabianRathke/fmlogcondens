@@ -21,7 +21,7 @@ conv(X)}
 }
 \value{
 List containing the optimal parameters as well as the log likelihood
-  \item{params}{Stacked vector of hyperplane slopes and offsets}
+  \item{params}{Stacked vector of hyperplane normals and intercepts}
   \item{logLike}{Vector containing function evaluations log(f(x_i))}
 }
 \description{

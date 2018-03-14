@@ -5,7 +5,6 @@
 #include <string.h>
 #include <float.h>
 #include <time.h>
-#include <omp.h>
 #include <headers.h>
 
 extern void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double *paramsB, int *lenP, int *lenPB_, int *dim_, int *n_, double *ACVH, double *bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double *cutoff_, int *verbose_, double *gamma_, int *maxIter_);
@@ -29,7 +28,7 @@ int main() {
     double *box  = mxGetData(matGetVariable(pmat,"box"));
     double *ACVH  = mxGetData(matGetVariable(pmat,"ACVH"));
     double *bCVH  = mxGetData(matGetVariable(pmat,"bCVH"));
-    int verbose = 2;
+    int verbose = 0;
     double intEps = 1e-3;
     double lambdaSqEps = 1e-7;
     double cutoff = 1e-1;

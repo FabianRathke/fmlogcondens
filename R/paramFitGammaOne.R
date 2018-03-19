@@ -11,15 +11,17 @@
 #' @param w Vector with weights for X (\code{sum(w)==1})
 #' @param ACVH Matrix where each row constitutes the normal vector of a face of
 #'   conv(X)
-#' @param bCVH Vector where each entry constitutes the offset for a face of
+#' @param bCVH Vector where each entry constitutes the intercept for a face of
 #'   conv(X)
 #' @param cvh Matrix where each row is a set of indices of points in X
 #'   describing one face of conv(X)
 #'
 #' @return A list containing the description of the upper convex hull of
 #'   (X,log(y)) in term of hyperplane parameters: \item{a}{A matrix where each
-#'   row constitutes the normal vector of a face} \item{b}{A vector where each
-#'   entry constitutes the offset of a face}
+#'   row constitutes a hyperplane normal} \item{b}{A vector where each
+#'   entry constitutes the intercept of a hyperplane}
+#'
+#'   Note the difference
 #'
 #' @example R/Examples/paramFitGammaOne
 

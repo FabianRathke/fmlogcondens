@@ -6,6 +6,12 @@ void printAVXInfo() {
 #elif __AVX__
 	Rprintf("AVX vector extensions activated.\n");
 #else
-	Rprintf("No vector extensions activated.\n");
+	Rprintf("No vector extensions activated. (no AVX)\n");
+#endif
+
+#ifdef _OPENMP
+	Rprintf("Parallel computing activated (OMP).\n");
+#else
+	Rprintf("No parallel computing activated (no OMP).\n");
 #endif
 }

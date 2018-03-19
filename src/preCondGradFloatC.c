@@ -94,7 +94,6 @@ void preCondGradFloatC(int** elementList, int** elementListSize, int* numEntries
 		#pragma omp single
 		{
 			if (**elementListSize < counter) {
-		/*		printf("Reallocate elementList\n"); */
 				*elementList = realloc(*elementList,counter*sizeof(int));
 				**elementListSize = counter;
 			}

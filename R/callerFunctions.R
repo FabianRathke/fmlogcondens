@@ -71,7 +71,7 @@ callNewtonBFGSLC <- function (X, w, params, paramsKernel, cvhParams, gamma=1000,
 #' @inheritParams paramFitGammaOne
 #'
 #' @return List containing the optimal parameters as well as the log likelihood
-#'   \item{params}{Stacked vector of hyperplane slopes and offsets}
+#'   \item{params}{Stacked vector of hyperplane normals and intercepts}
 #'   \item{logLike}{Vector containing function evaluations log(f(x_i))}
 
 callNewtonBFGSLInitC <- function (X, w, params, ACVH, bCVH) {
@@ -109,8 +109,8 @@ callNewtonBFGSLInitC <- function (X, w, params, ACVH, bCVH) {
 #' @inheritParams paramFitGammaOne
 #'
 #' @return List containing the normalized parametrers
-#'   \item{a}{Vector of hyperplane slopes}
-#'   \item{b}{Vector of hyperplane offsets}
+#'   \item{a}{Vector of hyperplane normals}
+#'   \item{b}{Vector of hyperplane intercepts}
 
 callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
 

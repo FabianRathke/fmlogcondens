@@ -1,7 +1,7 @@
 Package: fmlogcondens
 Type: Package
 Title: Fast Multivariate Log-Concave Density Estimation
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(person("Fabian", "Rathke", role=c("aut", "cre"),
                     email = "frathke@gmail.com"),
              person("Christoph", "Schnörr", role="aut"),

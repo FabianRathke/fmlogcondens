@@ -216,9 +216,8 @@ void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox
 #ifdef __AVX__
 	int nB = ((int) (*numBoxes/8) + 1)*8;
 #else
-	int nB = *numBoxes
+	int nB = *numBoxes;
 #endif
-	printf("%d, %d\n",*numBoxes, nB);
     *numPointsPerBox = calloc(*numBoxes+1,sizeof(int));
 	*boxEvalPoints = calloc(*numBoxes*3*dim,sizeof(double)); 
 
@@ -386,14 +385,12 @@ void makeGridC(double *X, unsigned short int **YIdx, unsigned short int **XToBox
 #ifdef __AVX__
 		nB = ((int) (counterNumBoxes/8) + 1)*8;
 #else
-		nB = counterNumBoxes
+		nB = counterNumBoxes;
 #endif
-		printf("resize arrays\n");
         *numPointsPerBox = realloc(*numPointsPerBox,(nB+1)*sizeof(int));
 		*boxEvalPoints = realloc(*boxEvalPoints,nB*dim*3*sizeof(double)); 
     }
     *numBoxes = counterNumBoxes;
-	printf("%d, %d\n",*numBoxes, nB);
 
     if (numPointsAdded != *lenY) {
         *YIdx = realloc(*YIdx,numPointsAdded*dim*sizeof(unsigned short int));

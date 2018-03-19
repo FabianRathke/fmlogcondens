@@ -156,7 +156,7 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 #ifdef __AVX__
 	int nB = ((int) (numBoxes/8) + 1)*8;
 #else
-    int nB = numBoxes
+    int nB = numBoxes;
 #endif
 	float *boxEvalPointsFloat = malloc(nB*dim*3*sizeof(float));
 	for (i=0; i < nB*dim*3; i++) { boxEvalPointsFloat[i] = (float) boxEvalPoints[i]; }
@@ -262,7 +262,6 @@ void newtonBFGSLC(double *X_,  double *XW_, double *box, double *params_, double
 	int *elementListSize = NULL, *elementList = NULL, *numEntries = NULL, *maxElement=NULL, *idxEntries=NULL, *numEntriesCumSum = NULL;
 	// start the main iteration
 	for (iter = 0; iter < maxIter; iter++) {
-		printf("%d\n",iter);
 		nHHist[iter] = nH;
 		timer = cpuSecond();
 		updateList--;

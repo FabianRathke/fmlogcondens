@@ -191,7 +191,7 @@ void calcExactIntegralC(double *X, double *y, int *T, int *lenT, int *lenY, int 
     int cont;
 	double *Ad = malloc(*lenT*sizeof(double));
 	double *Gd = malloc(*lenT*sizeof(double));
-	double changeB, integral;
+	double integral;
 
     integral = calcIntegral(X,y,*lenY,T,*lenT,*dim,Ad,Gd);
     while (fabs(*targetIntegral - integral) > *intEps && iter < maxIter) {
@@ -208,7 +208,6 @@ void calcExactIntegralC(double *X, double *y, int *T, int *lenT, int *lenY, int 
             integral = calcIntegral(X,yTmp,*lenY,T,*lenT,*dim,Ad,Gd);
             if (fabs(*targetIntegral - integral) < oldDistAbs)
             {
-                changeB += oldDist*factor;
                 for (i=0; i < *lenY; i++) {
                     y[i] += oldDist*factor;
                 }

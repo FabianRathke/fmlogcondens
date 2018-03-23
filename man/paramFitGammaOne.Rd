@@ -14,7 +14,7 @@ paramFitGammaOne(X, w, ACVH, bCVH, cvh)
 \item{ACVH}{Matrix where each row constitutes the normal vector of a face of
 conv(X)}
 
-\item{bCVH}{Vector where each entry constitutes the offset for a face of
+\item{bCVH}{Vector where each entry constitutes the intercept for a face of
 conv(X)}
 
 \item{cvh}{Matrix where each row is a set of indices of points in X
@@ -23,8 +23,10 @@ describing one face of conv(X)}
 \value{
 A list containing the description of the upper convex hull of
   (X,log(y)) in term of hyperplane parameters: \item{a}{A matrix where each
-  row constitutes the normal vector of a face} \item{b}{A vector where each
-  entry constitutes the offset of a face}
+  row constitutes a hyperplane normal} \item{b}{A vector where each
+  entry constitutes the intercept of a hyperplane}
+
+  Note the difference
 }
 \description{
 \code{paramFitGammaOne} fits in a first step a log-concave

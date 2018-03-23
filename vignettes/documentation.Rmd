@@ -74,7 +74,7 @@ The drawback of this approach is that the installed binaries where compiled for 
 
 ### Installation with AVX support (Linux and Mac OS only) {#AVX}
 
-AVX is the successor to SSE and MMX, and denotes the ability of modern CPUs to do certain simple computations (addition, multiplication, ...) much faster due to specialized instructions. To activate AVX, we have to install the package from source. To do this, we first download the source code from CRAN: [link](https://CRAN.R-project.org/package=fmlogcondens/index.html) (download the `tar.gz` file).
+AVX is the successor to SSE and MMX, and denotes the ability of modern CPUs to do certain simple computations (addition, multiplication, ...) much faster due to specialized instructions. To activate AVX, we have to install the package from source. To do this, we first download the source code from CRAN: [link](https://cran.r-project.org/package=fmlogcondens) (Package source:	`fmlogondens_x.x.x.tar.gz`).
 
 Then in your favorite text editor open the file `~/.R/Makevars` (create it if it does not exist) and add the line
 ```
@@ -94,6 +94,10 @@ R CMD INSTALL path-to-package/fmlogcondens_1.0.0.tar.gz
 ```
 You can check whether AVX was activated for the installation by calling the function `compilationInfo()` in R after loading the package. The desired output would be `
 AVX vector extensions activated.`. 
+
+### A note on OpenMP and MacOS
+
+OpenMP (Open Multi-Processing) is a API for C that supports multi-threaded programming. `fmlogcondens` automatically supports OpenMP. Problems can arise for MacOS when compiling from source, since the `clang` compiler may not support OpenMP. In that case you can try to follow this [tutorial](http://thecoatlessprofessor.com/programming/openmp-in-r-on-os-x/) for a guide how to setup OpenMP under MacOS.
 
 ## Usage
 

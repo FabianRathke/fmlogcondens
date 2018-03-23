@@ -34,7 +34,7 @@
 #'
 #' @example R/Examples/correctIntegral
 
-fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-4, objEps = 1e-7, offset = 1e-1, maxIter = 1e4) {
+fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-3, objEps = 1e-7, offset = 1e-1, maxIter = 1e4) {
 
   gamma = 1000
   n <- dim(X)[1]

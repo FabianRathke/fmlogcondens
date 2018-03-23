@@ -1,4 +1,10 @@
-exportPattern("^[^\\.]")
+export(fmlcd)
+export(fmlcdEM)
+export(compilationInfo)
+export(paramFitKernelDensity)
+export(paramFitGammaOne)
+export(correctIntegral)
+export(calcCvxHullFaces)
 
 importFrom("stats", "runif", "sd", "var")
 

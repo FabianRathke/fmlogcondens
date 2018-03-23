@@ -7,14 +7,18 @@
 #include <malloc.h>
 #endif
 
-
+/* Alligned memory allocation is non-trivial: We have seperate cases for Windows, Solaris and Linux/MacOS */
 void alloc_aligned_mem(int numEntries, int align, float **ptr) {
 #ifndef _WIN32
+#ifdef __sun
+	*ptr = memalign((size_t) align, (size_t) (numEntries*sizeof(float)));
+#else
 	int returnVal;
 	returnVal = posix_memalign((void **) ptr, align, numEntries*sizeof(float));
 	if (returnVal != 0) {
 		error("Memory allocation failed\n");
 	}
+#endif
 #else
 	*ptr = _aligned_malloc(((size_t) numEntries)*sizeof(float),(size_t) align);
 #endif

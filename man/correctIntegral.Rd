@@ -11,9 +11,9 @@ correctIntegral(X, mu, a, b, cvh)
 
 \item{mu}{Mean vector of X that gets added back to X}
 
-\item{a}{Matrix where rows are slopes of hyperplanes}
+\item{a}{Matrix where rows are hyperplane normals}
 
-\item{b}{Vector where entries are offsets of hyperplanes}
+\item{b}{Vector where entries are intercepts of hyperplanes}
 
 \item{cvh}{Matrix where each row is a set of indices of points in X
 describing one face of conv(X)}

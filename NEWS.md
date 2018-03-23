@@ -13,3 +13,9 @@ Provide the functions necessary to estimate a multivariate log-concave density f
 * Fixed a memory leak in C
 
 * Some Mac OS X specific fixes for the C code
+
+
+
+## 1.0.2
+
+* Solaris-specific fix regarding aligned memory allocation

@@ -37,10 +37,10 @@ void resizeArray(double** array, int* keepIdx, int nNew, int n, int dim) {
 
 void resizeCNSarray(double **a, int c, int c_, int activeCol, int lenP, int m) {
 	if (c_!=-1) {
-		memcpy(*a+c_*lenP,*a,(activeCol+1)*lenP*sizeof(double));
-    	memcpy(*a,*a+c*lenP,c_*lenP*sizeof(double));
+		memmove(*a+c_*lenP,*a,(activeCol+1)*lenP*sizeof(double));
+    	memmove(*a,*a+c*lenP,c_*lenP*sizeof(double));
 	} else {
-		memcpy(*a,*a+c*lenP,lenP*m*sizeof(double));
+		memmove(*a,*a+c*lenP,lenP*m*sizeof(double));
 	}
 	double *newArray = realloc(*a,m*lenP*sizeof(double));
  	if (newArray == NULL && m*lenP > 0) {

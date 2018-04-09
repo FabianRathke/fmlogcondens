@@ -12,8 +12,8 @@ Description: A fast solver for the maximum likelihood estimator (MLE) of a
   well-known parametric densities belong to that class, among them the normal 
   density, the uniform density, the exponential distribution and many more. This
   package provides functions for the estimation of a log-concave density and
-  a mixture of log-concave densities in multiple dimensions. While being similar
-  to the package LogConcDEAD, fmlogcondens provides much fast run times for 
+  a mixture of log-concave densities in a multivariate setting. While being almost identical
+  to the package LogConcDEAD in terms of the estimated density, fmlogcondens provides the result magnitudes faster for 
   large samples (>= 250 points). As a reference see Fabian Rathke, Christoph 
   Schnörr (2015), <doi:10.1515/auom-2015-0053>.
 License: GPL (>= 2)

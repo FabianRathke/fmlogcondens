@@ -8,6 +8,8 @@
 #include <R.h>
 #include <headers.h>
 
+extern void newtonBFGSLInitC(double* X,  double* XW, double* box, double* params, int *dim_, int *lenP_, int *n_, double* ACVH, double* bCVH, int *lenCVH_, double *intEps_, double *lambdaSqEps_, double* logLike);
+
 int main() {
 #ifdef __AVX__
     printf("Perform AVX optimziation\n");

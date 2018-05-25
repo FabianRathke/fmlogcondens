@@ -32,7 +32,7 @@
 #'   \sum(y_i)}).} \item{aOptSparse, bOptSparse}{Sparse parametrization
 #'   normalized on the integration grid.}
 #'
-#' @example R/Examples/correctIntegral
+#' @example R/Examples/fmlcd
 
 fmlcd <- function(X, w=rep(1/nrow(X),nrow(X)), init='', verbose=0, intEps = 1e-3, objEps = 1e-7, offset = 1e-1, maxIter = 1e4) {
 

@@ -57,8 +57,8 @@ callCalcExactIntegralC <- function(X, y, cvh, filter, eps) {
   P <- matrix(c(X[filter, ], y[filter]), nrow = length(filter))
   Q <- matrix(c(X[idxCVH, ], rep(min(y[idxCVH]) - 1, length(idxCVH))), nrow = length(idxCVH))
 
-  X = X[filter, ]
-  y = y[filter]
+  X <- matrix(X[filter, ])
+  y <- y[filter]
 
   n <- dim(X)[1]
   d <- dim(X)[2]

@@ -32,10 +32,9 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 	if (-dotProd/normTmp > 0) {
 		t += -dotProd/normTmp;
 	}
-	//printf("gammaBFGS: %.4e, t: %.7f, gammaBFGS'*s_k: %.4e, s_k'*s_k: %.4e\n",gammaBFGS[0],t,dotProd,normTmp);
 
 	dotProd = dotProd2 = 0;
-	#pragma omp parallel for reduction(+:dotProd,dotProd2) private(y_k_tmp)
+	//#pragma omp parallel for reduction(+:dotProd,dotProd2) private(y_k_tmp)
 	for (j=0; j < nH; j++) {
 		y_k_tmp = gammaBFGS[j] + t*s_k[activeIdx+j];
 		y_k[activeIdx + j] = y_k_tmp;
@@ -46,7 +45,6 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 	syInv[activeCol] = 1/sy[activeCol];
 
     H0 = sy[activeCol]/dotProd2;
-
 	for (j=0; j < numIter; j++) {
 		iterVec[j] = activeCol-j;
 		if (iterVec[j] < 0) {
@@ -90,7 +88,7 @@ void CNS(double* s_k, double *y_k, double *sy, double *syInv, double step, doubl
 	for (j=0; j < nH; j++) {
 		q[j] = H0*q[j]; // is "r" in the matlab code and the book
 	}
-	// second for-loop
+// second for-loop
 #ifdef __AVX__
 	__m256d tmp_;
 #endif

@@ -19,7 +19,7 @@ full: makeGridC.o CNS.o calcGradAVX.o calcGradC.o preCondGradAVXC.o calcGradFast
 debug: makeGridC.o CNS.o calcGradAVX.o calcGradC.o preCondGradAVXC.o calcGradFastFloatC.o calcGradFastC.o util.o bfgsFullC.o calcGradFloatC.o preCondGradFloatC.o
 	gcc -g callerFull.c -o runDebug -I$(MATLABINCLUDE) -L$(MATLABLIB) $(FLAGSGCC) -O0 -Wl,-rpath,$(MATLABLIB) -DFILELOC='"$(FILELOC)"' $^ -lm -lR -fopenmp -lmx -lmat -lmex 
 
-init: makeGridC.o calcGradFullAVXC.o calcGradFloatC.o CNS.o util.o bfgsInitC.o
+init: makeGridC.o calcGradAVX.o calcGradFullAVXC.o calcGradFloatC.o CNS.o util.o bfgsInitC.o
 	gcc -g callerInit.c -o runInit -I$(MATLABINCLUDE) -L$(MATLABLIB) $(FLAGSGCC) -L/usr/lib/R/lib/ -Wl,-rpath,$(MATLABLIB) -DFILELOC='"$(FILELOC)"' $^ -lm -lR -fopenmp -lmx -lmat -lmex 
 
 %.o: %.c

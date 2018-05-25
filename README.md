@@ -1,4 +1,4 @@
-# fmlogcondens
+# fmlogcondens  ![](http://cranlogs.r-pkg.org/badges/fmlogcondens)
 
 `fmlogcondens` is a package written in R and C, which provides a solver for the maximum likelihood estimation of a multivariate log-concave density. Log-concave densities are an important class of density functions, which encompass several well-known parametric densities such as the normal, uniform, gamma(r, lambda) with r >= 1, Beta(a,b) with a,b >= 1 and many more. They are density functions, whose logarithm is a concave function.  
 
